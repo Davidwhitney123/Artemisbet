@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  /* Core Blues */
+  --ab-navy:    #0A1F5C;   /* headers, navbar, strong emphasis */
+  --ab-royal:   #1A3A8F;   /* buttons, section titles */
+  --ab-electric:#1E6FD9;   /* interactive, links, CTA */
+  --ab-sky:     #4FA8F5;   /* highlights, hover states */
+  --ab-ice:     #D6EAFF;   /* card backgrounds, chips */
+  --ab-white:   #F5F8FF;   /* page background */
+
+  /* Accent Colors */
+  --ab-win:     #00C896;   /* won bets, success states */
+  --ab-loss:    #FF4D6A;   /* lost bets, errors */
+  --ab-live:    #FF8C00;   /* live match indicator */
+  --ab-promo:   #A855F7;   /* promotions, special events */
+  --ab-gold:    #FFD700;   /* top winners, leaderboard */
+
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+body {
+  background-color: var(--ab-white);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+}
