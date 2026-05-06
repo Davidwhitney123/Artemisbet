@@ -1,10 +1,19 @@
 "use client";
 import { ConnectKitButton } from "connectkit";
 import Link from "next/link";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
+import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
 
 export default function Navbar() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+
+  const { data: owner } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ARTEMIS_ABI,
+    functionName: "owner",
+  });
+
+  const isOwner = address && owner && address.toLowerCase() === (owner as string).toLowerCase();
 
   return (
     <nav style={{
@@ -19,7 +28,6 @@ export default function Navbar() {
       zIndex: 100,
       boxShadow: "0 2px 20px rgba(10,31,92,0.3)",
     }}>
-      {/* Logo */}
       <Link href="/" style={{ textDecoration: "none" }}>
         <span style={{
           fontFamily: "var(--font-display)",
@@ -32,47 +40,25 @@ export default function Navbar() {
         </span>
       </Link>
 
-      {/* Nav Links */}
       <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-        <Link href="/" style={{
-          color: "rgba(255,255,255,0.75)",
-          textDecoration: "none",
-          fontSize: "14px",
-          fontWeight: 500,
-          transition: "color 0.2s",
-        }}>
+        <Link href="/" style={{ color: "rgba(255,255,255,0.75)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
           ⚽ Matches
         </Link>
         {isConnected && (
           <>
-            <Link href="/bets" style={{
-              color: "rgba(255,255,255,0.75)",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 500,
-            }}>
+            <Link href="/bets" style={{ color: "rgba(255,255,255,0.75)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
               My Bets
             </Link>
-            <Link href="/wallet" style={{
-              color: "rgba(255,255,255,0.75)",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 500,
-            }}>
+            <Link href="/wallet" style={{ color: "rgba(255,255,255,0.75)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
               Wallet
             </Link>
-            <Link href="/admin" style={{
-              color: "rgba(255,255,255,0.75)",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 500,
-            }}>
-              Admin
-            </Link>
+            {isOwner && (
+              <Link href="/admin" style={{ color: "var(--ab-sky)", textDecoration: "none", fontSize: "14px", fontWeight: 700 }}>
+                ⚙ Admin
+              </Link>
+            )}
           </>
         )}
-
-        {/* Connect Wallet Button */}
         <ConnectKitButton />
       </div>
     </nav>

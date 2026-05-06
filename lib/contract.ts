@@ -131,6 +131,15 @@ export const ARTEMIS_ABI = [
     inputs: [{ name: "amount", type: "uint256" }],
     outputs: [],
   },
+
+  // ── Owner ───────────────────────────────────────────────
+  {
+    name: "owner",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+  },
 ] as const;
 
 export const USDC_ABI = [
