@@ -10,7 +10,8 @@ const outcomeLabels = ["Home Win", "Draw", "Away Win"];
 export default function UserBets() {
   const { address } = useAccount();
   const [claiming, setClaiming] = useState<number | null>(null);
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync: writeContract } = useWriteContract();
+const writeContractAsync = writeContract as any;
 
   const { data: betIds, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,

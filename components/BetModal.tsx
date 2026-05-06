@@ -36,7 +36,8 @@ export default function BetModal({ match, onClose, onSuccess }: BetModalProps) {
   const [step, setStep] = useState<"bet" | "approving" | "betting" | "done">("bet");
   const [error, setError] = useState("");
 
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync: writeContract } = useWriteContract();
+const writeContractAsync = writeContract as any;
 
   // Get user balance on contract
   const { data: balance } = useReadContract({

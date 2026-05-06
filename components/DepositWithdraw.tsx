@@ -11,7 +11,8 @@ export default function DepositWithdraw({ onSuccess }: { onSuccess?: () => void 
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState("");
 
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync: writeContract } = useWriteContract();
+const writeContractAsync = writeContract as any;
 
   const { data: contractBalance, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
