@@ -1,7 +1,6 @@
 import { createConfig, http } from "wagmi";
 import { getDefaultConfig } from "connectkit";
 
-// Arc Testnet chain definition
 export const arcTestnet = {
   id: 5042002,
   name: "Arc Testnet",
@@ -12,6 +11,9 @@ export const arcTestnet = {
   },
   rpcUrls: {
     default: {
+      http: ["https://rpc.testnet.arc.network"],
+    },
+    public: {
       http: ["https://rpc.testnet.arc.network"],
     },
   },
@@ -28,7 +30,11 @@ export const config = createConfig(
   getDefaultConfig({
     chains: [arcTestnet],
     transports: {
-      [arcTestnet.id]: http("https://rpc.testnet.arc.network"),
+      [arcTestnet.id]: http("https://rpc.testnet.arc.network", {
+        batch: true,
+        retryCount: 3,
+        retryDelay: 1000,
+      }),
     },
     walletConnectProjectId:
       process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,

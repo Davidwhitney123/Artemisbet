@@ -15,11 +15,13 @@ export default function Home() {
     address: CONTRACT_ADDRESS,
     abi: ARTEMIS_ABI,
     functionName: "matchCount",
+    query: {
+      refetchInterval: 5000,
+    },
   });
 
-  const matchIds = matchCount
-    ? Array.from({ length: Number(matchCount) }, (_, i) => BigInt(i))
-    : [];
+  const count = matchCount ? Number(matchCount) : 0;
+  const matchIds = Array.from({ length: count }, (_, i) => BigInt(i));
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
@@ -62,10 +64,10 @@ export default function Home() {
             fontSize: "20px", color: "var(--ab-navy)",
             margin: "0 0 1rem",
           }}>
-            {matchIds.length > 0 ? `${matchIds.length} Active Matches` : "Upcoming Matches"}
+            {count > 0 ? `${count} Active Match${count > 1 ? "es" : ""}` : "Upcoming Matches"}
           </p>
 
-          {matchIds.length === 0 ? (
+          {count === 0 ? (
             <div style={{
               background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)",
               borderRadius: "16px", padding: "3rem", textAlign: "center",
@@ -113,20 +115,53 @@ export default function Home() {
 }
 
 function MatchItem({ matchId, onBetPlaced }: { matchId: bigint; onBetPlaced?: () => void }) {
-  const { data: raw } = useReadContract({
+  const { data: raw, isLoading, isError } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: ARTEMIS_ABI,
     functionName: "getMatch",
     args: [matchId],
+    query: {
+      refetchInterval: 5000,
+    },
   });
 
-  if (!raw) return null;
+  if (isLoading) return (
+    <div style={{
+      background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)",
+      borderRadius: "16px", padding: "1.25rem", textAlign: "center",
+      minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <p style={{ color: "#888", fontSize: "14px" }}>Loading match...</p>
+    </div>
+  );
 
-  const [id, sport, homeTeam, awayTeam, league, startTime, status, result, totalStakedUSDC] = raw as any;
+  if (isError || !raw) return (
+    <div style={{
+      background: "#fff", border: "0.5px solid rgba(255,77,106,0.2)",
+      borderRadius: "16px", padding: "1.25rem", textAlign: "center",
+      minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <p style={{ color: "var(--ab-loss)", fontSize: "14px" }}>
+        Failed to load match #{matchId.toString()}
+      </p>
+    </div>
+  );
+
+  const match = raw as any;
 
   return (
     <MatchCard
-      match={{ id, sport, homeTeam, awayTeam, league, startTime, status, result, totalStakedUSDC }}
+      match={{
+        id: match[0],
+        sport: Number(match[1]),
+        homeTeam: match[2],
+        awayTeam: match[3],
+        league: match[4],
+        startTime: match[5],
+        status: Number(match[6]),
+        result: Number(match[7]),
+        totalStakedUSDC: match[8],
+      }}
       onBetPlaced={onBetPlaced}
     />
   );
