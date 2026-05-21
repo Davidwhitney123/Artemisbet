@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { formatUSDC, getSportLabel, getStatusLabel, getStatusColor, formatDate } from "@/lib/utils";
+import { formatUSDC, getSportLabel, getStatusLabel, formatDate } from "@/lib/utils";
 import BetModal from "./BetModal";
 
 interface Match {
@@ -21,14 +21,13 @@ interface MatchCardProps {
 }
 
 const outcomeLabels = ["Home Win", "Draw", "Away Win"];
-const resultColors = ["var(--ab-electric)", "var(--ab-sky)", "var(--ab-royal)"];
 
 export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
   const [showBetModal, setShowBetModal] = useState(false);
   const isOpen = match.status === 0;
-  const isLive = isOpen && Number(match.startTime) * 1000 > Date.now();
   const isResolved = match.status === 2;
   const isCancelled = match.status === 3;
+  const matchStarted = Number(match.startTime) * 1000 < Date.now();
 
   return (
     <>
@@ -38,7 +37,6 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
         borderRadius: "16px",
         padding: "1.25rem",
         transition: "transform 0.2s, box-shadow 0.2s",
-        cursor: "pointer",
       }}
         onMouseEnter={e => {
           (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
@@ -55,7 +53,20 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
             {getSportLabel(match.sport)} · {match.league}
           </span>
           <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-            {isLive && (
+            {isOpen && !matchStarted && (
+              <span style={{
+                background: "rgba(0,200,150,0.1)",
+                color: "var(--ab-win)",
+                border: "0.5px solid rgba(0,200,150,0.3)",
+                borderRadius: "20px",
+                padding: "2px 10px",
+                fontSize: "11px",
+                fontWeight: 600,
+              }}>
+                ● OPEN
+              </span>
+            )}
+            {isOpen && matchStarted && (
               <span style={{
                 background: "rgba(255,140,0,0.1)",
                 color: "var(--ab-live)",
@@ -190,9 +201,12 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
         </div>
 
         {/* Bet Button */}
-        {isOpen && (
+        {isOpen ? (
           <button
-            onClick={() => setShowBetModal(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowBetModal(true);
+            }}
             style={{
               width: "100%",
               background: "var(--ab-royal)",
@@ -206,15 +220,32 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
               cursor: "pointer",
               letterSpacing: "0.03em",
               transition: "background 0.2s",
+              pointerEvents: "all",
+              zIndex: 10,
+              position: "relative",
             }}
             onMouseEnter={e => (e.currentTarget.style.background = "var(--ab-electric)")}
             onMouseLeave={e => (e.currentTarget.style.background = "var(--ab-royal)")}
           >
             Place Bet →
           </button>
+        ) : (
+          <div style={{
+            width: "100%",
+            background: "var(--ab-ice)",
+            borderRadius: "10px",
+            padding: "12px",
+            textAlign: "center",
+            fontSize: "14px",
+            color: "var(--ab-royal)",
+            fontWeight: 500,
+          }}>
+            {isResolved ? "Match Resolved" : isCancelled ? "Match Cancelled" : "Betting Closed"}
+          </div>
         )}
       </div>
 
+      {/* Bet Modal rendered at root level */}
       {showBetModal && (
         <BetModal
           match={match}
