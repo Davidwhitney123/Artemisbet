@@ -25,18 +25,17 @@ const outcomeLabels = ["Home Win", "Draw", "Away Win"];
 export default function MatchCard({ match: rawMatch, onBetPlaced }: MatchCardProps) {
   const [showBetModal, setShowBetModal] = useState(false);
 
-  // Normalize named tuple or indexed tuple from contract
   const m = rawMatch as any;
   const match: Match = {
-    id: m?.id ?? m?.[0] ?? BigInt(0),
-    sport: Number(m?.sport ?? m?.[1] ?? 0),
-    homeTeam: m?.homeTeam ?? m?.[2] ?? "",
-    awayTeam: m?.awayTeam ?? m?.[3] ?? "",
-    league: m?.league ?? m?.[4] ?? "",
-    startTime: m?.startTime ?? m?.[5] ?? BigInt(0),
-    status: Number(m?.status ?? m?.[6] ?? 0),
-    result: Number(m?.result ?? m?.[7] ?? 0),
-    totalStakedUSDC: m?.totalStakedUSDC ?? m?.[8] ?? BigInt(0),
+    id: BigInt(m.id ?? 0),
+    sport: Number(m.sport ?? 0),
+    homeTeam: String(m.homeTeam ?? ""),
+    awayTeam: String(m.awayTeam ?? ""),
+    league: String(m.league ?? ""),
+    startTime: BigInt(m.startTime ?? 0),
+    status: Number(m.status ?? 0),
+    result: Number(m.result ?? 0),
+    totalStakedUSDC: BigInt(m.totalStakedUSDC ?? 0),
   };
 
   const isOpen = match.status === 0;

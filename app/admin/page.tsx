@@ -232,14 +232,13 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
 
   if (!raw) return null;
 
-  // Contract returns a named tuple - access by name with fallback to index
-  const match = raw as any;
-  const id: bigint = match?.id ?? match?.[0] ?? matchId;
-  const homeTeam: string = match?.homeTeam ?? match?.[2] ?? "";
-  const awayTeam: string = match?.awayTeam ?? match?.[3] ?? "";
-  const league: string = match?.league ?? match?.[4] ?? "";
-  const status: number = Number(match?.status ?? match?.[6] ?? 0);
-  const totalStaked: bigint = match?.totalStakedUSDC ?? match?.[8] ?? BigInt(0);
+  const m = raw as any;
+  const id: bigint = BigInt(m.id ?? 0);
+  const homeTeam: string = String(m.homeTeam ?? "");
+  const awayTeam: string = String(m.awayTeam ?? "");
+  const league: string = String(m.league ?? "");
+  const status: number = Number(m.status ?? 0);
+  const totalStaked: bigint = BigInt(m.totalStakedUSDC ?? 0);
 
   const isOpen = status === 0;
   const isClosed = status === 1;
@@ -284,7 +283,7 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
             {homeTeam} vs {awayTeam}
           </p>
           <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
-            {league} · ID #{id?.toString() ?? matchId.toString()} · Staked: ${formatUSDC(totalStaked)}
+            {league} · ID #{id.toString()} · Staked: ${formatUSDC(totalStaked)}
           </p>
         </div>
         <span style={{
