@@ -22,8 +22,23 @@ interface MatchCardProps {
 
 const outcomeLabels = ["Home Win", "Draw", "Away Win"];
 
-export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
+export default function MatchCard({ match: rawMatch, onBetPlaced }: MatchCardProps) {
   const [showBetModal, setShowBetModal] = useState(false);
+
+  // Normalize named tuple or indexed tuple from contract
+  const m = rawMatch as any;
+  const match: Match = {
+    id: m?.id ?? m?.[0] ?? BigInt(0),
+    sport: Number(m?.sport ?? m?.[1] ?? 0),
+    homeTeam: m?.homeTeam ?? m?.[2] ?? "",
+    awayTeam: m?.awayTeam ?? m?.[3] ?? "",
+    league: m?.league ?? m?.[4] ?? "",
+    startTime: m?.startTime ?? m?.[5] ?? BigInt(0),
+    status: Number(m?.status ?? m?.[6] ?? 0),
+    result: Number(m?.result ?? m?.[7] ?? 0),
+    totalStakedUSDC: m?.totalStakedUSDC ?? m?.[8] ?? BigInt(0),
+  };
+
   const isOpen = match.status === 0;
   const isResolved = match.status === 2;
   const isCancelled = match.status === 3;
@@ -195,7 +210,7 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: "10px", color: "#888", margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Match ID</p>
             <p style={{ fontSize: "14px", fontWeight: 700, color: "var(--ab-navy)", margin: 0, fontFamily: "var(--font-display)" }}>
-              #{match.id.toString()}
+              #{match.id?.toString() ?? "—"}
             </p>
           </div>
         </div>
