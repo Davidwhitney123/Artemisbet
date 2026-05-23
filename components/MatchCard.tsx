@@ -1,275 +1,351 @@
 "use client";
 import { useState } from "react";
-import { formatUSDC, getSportLabel, getStatusLabel, formatDate } from "@/lib/utils";
-import BetModal from "./BetModal";
+import { useReadContract, useWriteContract, useAccount } from "wagmi";
+import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
+import Navbar from "@/components/Navbar";
+import { formatUSDC } from "@/lib/utils";
 
-interface Match {
-  id: bigint;
-  sport: number;
-  homeTeam: string;
-  awayTeam: string;
-  league: string;
-  startTime: bigint;
-  status: number;
-  result: number;
-  totalStakedUSDC: bigint;
-}
+const statusLabels = ["Open", "Closed", "Resolved", "Cancelled"];
 
-interface MatchCardProps {
-  match: Match;
-  onBetPlaced?: () => void;
-}
+export default function AdminPage() {
+  const { address } = useAccount();
 
-const outcomeLabels = ["Home Win", "Draw", "Away Win"];
+  const { data: owner } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ARTEMIS_ABI,
+    functionName: "owner",
+  });
 
-export default function MatchCard({ match: rawMatch, onBetPlaced }: MatchCardProps) {
-  const [showBetModal, setShowBetModal] = useState(false);
+  const isOwner =
+    address &&
+    owner &&
+    address.toLowerCase() === (owner as string).toLowerCase();
 
-  const m = rawMatch as any;
-  const match: Match = {
-    id: BigInt(m.id ?? 0),
-    sport: Number(m.sport ?? 0),
-    homeTeam: String(m.homeTeam ?? ""),
-    awayTeam: String(m.awayTeam ?? ""),
-    league: String(m.league ?? ""),
-    startTime: BigInt(m.startTime ?? 0),
-    status: Number(m.status ?? 0),
-    result: Number(m.result ?? 0),
-    totalStakedUSDC: BigInt(m.totalStakedUSDC ?? 0),
+  const { data: matchCount, refetch } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ARTEMIS_ABI,
+    functionName: "matchCount",
+  });
+
+  const count = matchCount ? Number(matchCount) : 0;
+  const matchIds = Array.from({ length: count }, (_, i) => BigInt(i));
+
+  const [form, setForm] = useState({
+    sport: "0",
+    homeTeam: "",
+    awayTeam: "",
+    league: "",
+    startTime: "",
+  });
+  const [createStatus, setCreateStatus] = useState<
+    "idle" | "loading" | "done" | "error"
+  >("idle");
+  const [createError, setCreateError] = useState("");
+
+  const { writeContractAsync: wc } = useWriteContract();
+  const writeContractAsync = wc as any;
+
+  const handleCreate = async () => {
+    if (!form.homeTeam || !form.awayTeam || !form.league || !form.startTime) {
+      return setCreateError("All fields are required");
+    }
+    try {
+      setCreateError("");
+      setCreateStatus("loading");
+      const startTimestamp = BigInt(
+        Math.floor(new Date(form.startTime).getTime() / 1000)
+      );
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: ARTEMIS_ABI,
+        functionName: "createMatch",
+        args: [
+          Number(form.sport),
+          form.homeTeam,
+          form.awayTeam,
+          form.league,
+          startTimestamp,
+        ],
+      });
+      setCreateStatus("done");
+      setForm({ sport: "0", homeTeam: "", awayTeam: "", league: "", startTime: "" });
+      refetch();
+      setTimeout(() => setCreateStatus("idle"), 2000);
+    } catch (err: any) {
+      setCreateError(err?.message?.slice(0, 120) || "Transaction failed");
+      setCreateStatus("error");
+    }
   };
 
-  const isOpen = match.status === 0;
-  const isResolved = match.status === 2;
-  const isCancelled = match.status === 3;
-  const matchStarted = Number(match.startTime) * 1000 < Date.now();
+  if (!address)
+    return (
+      <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+        <Navbar />
+        <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
+          <p style={{ color: "#888", fontSize: "16px" }}>
+            Connect your wallet to access admin panel.
+          </p>
+        </div>
+      </main>
+    );
+
+  if (!isOwner)
+    return (
+      <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+        <Navbar />
+        <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
+          <p style={{ fontSize: "32px", margin: "0 0 12px" }}>🔒</p>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", fontSize: "18px" }}>
+            Access Denied
+          </p>
+          <p style={{ color: "#888", fontSize: "14px" }}>
+            Only the contract owner can access this page.
+          </p>
+        </div>
+      </main>
+    );
 
   return (
-    <>
-      <div style={{
-        background: "#fff",
-        border: "0.5px solid rgba(30,111,217,0.15)",
-        borderRadius: "16px",
-        padding: "1.25rem",
-        transition: "transform 0.2s, box-shadow 0.2s",
-      }}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
-          (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 30px rgba(30,111,217,0.12)";
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-          (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-          <span style={{ fontSize: "12px", color: "var(--ab-royal)", fontWeight: 500 }}>
-            {getSportLabel(match.sport)} · {match.league}
-          </span>
-          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-            {isOpen && !matchStarted && (
-              <span style={{
-                background: "rgba(0,200,150,0.1)",
-                color: "var(--ab-win)",
-                border: "0.5px solid rgba(0,200,150,0.3)",
-                borderRadius: "20px",
-                padding: "2px 10px",
-                fontSize: "11px",
-                fontWeight: 600,
-              }}>
-                ● OPEN
-              </span>
-            )}
-            {isOpen && matchStarted && (
-              <span style={{
-                background: "rgba(255,140,0,0.1)",
-                color: "var(--ab-live)",
-                border: "0.5px solid rgba(255,140,0,0.3)",
-                borderRadius: "20px",
-                padding: "2px 10px",
-                fontSize: "11px",
-                fontWeight: 600,
-              }}>
-                ● LIVE
-              </span>
-            )}
-            <span style={{
-              background: "var(--ab-ice)",
-              color: "var(--ab-royal)",
-              borderRadius: "20px",
-              padding: "2px 10px",
-              fontSize: "11px",
-              fontWeight: 500,
-            }}>
-              {getStatusLabel(match.status)}
-            </span>
-          </div>
-        </div>
+    <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+      <Navbar />
+      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2rem" }}>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "24px", color: "var(--ab-navy)", margin: "0 0 2rem" }}>
+          ⚙ Admin Panel
+        </p>
 
-        {/* Teams */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center",
-          gap: "8px",
-          marginBottom: "16px",
-        }}>
-          <div style={{ textAlign: "center" }}>
-            <p style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "16px",
-              color: "var(--ab-navy)",
-              margin: 0,
-            }}>
-              {match.homeTeam}
-            </p>
-            <p style={{ fontSize: "11px", color: "#888", margin: "2px 0 0" }}>Home</p>
-          </div>
-          <div style={{
-            background: "var(--ab-ice)",
-            borderRadius: "8px",
-            padding: "6px 12px",
-            textAlign: "center",
-          }}>
-            <p style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 800,
-              fontSize: "14px",
-              color: "var(--ab-electric)",
-              margin: 0,
-            }}>VS</p>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "16px",
-              color: "var(--ab-navy)",
-              margin: 0,
-            }}>
-              {match.awayTeam}
-            </p>
-            <p style={{ fontSize: "11px", color: "#888", margin: "2px 0 0" }}>Away</p>
-          </div>
-        </div>
+        {/* Create Match */}
+        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1.25rem" }}>
+            + Create Match
+          </p>
 
-        {/* Resolved Result Banner */}
-        {isResolved && (
-          <div style={{
-            background: "var(--ab-ice)",
-            borderRadius: "8px",
-            padding: "8px",
-            textAlign: "center",
-            marginBottom: "12px",
-          }}>
-            <p style={{ fontSize: "12px", color: "var(--ab-royal)", margin: 0, fontWeight: 600 }}>
-              Result: {outcomeLabels[match.result]}
-            </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+            <div>
+              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Sport</label>
+              <select
+                value={form.sport}
+                onChange={(e) => setForm((f) => ({ ...f, sport: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", background: "#fff" }}
+              >
+                <option value="0">⚽ Football</option>
+                <option value="1">🏀 Basketball</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>League</label>
+              <input
+                placeholder="e.g. Premier League"
+                value={form.league}
+                onChange={(e) => setForm((f) => ({ ...f, league: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Home Team</label>
+              <input
+                placeholder="e.g. Arsenal"
+                value={form.homeTeam}
+                onChange={(e) => setForm((f) => ({ ...f, homeTeam: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Away Team</label>
+              <input
+                placeholder="e.g. Chelsea"
+                value={form.awayTeam}
+                onChange={(e) => setForm((f) => ({ ...f, awayTeam: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+              />
+            </div>
+            <div style={{ gridColumn: "span 2" }}>
+              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Start Time</label>
+              <input
+                type="datetime-local"
+                value={form.startTime}
+                onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+              />
+            </div>
           </div>
-        )}
 
-        {/* Cancelled Banner */}
-        {isCancelled && (
-          <div style={{
-            background: "rgba(255,77,106,0.08)",
-            borderRadius: "8px",
-            padding: "8px",
-            textAlign: "center",
-            marginBottom: "12px",
-          }}>
-            <p style={{ fontSize: "12px", color: "var(--ab-loss)", margin: 0, fontWeight: 600 }}>
-              Match Cancelled · Refunds Available
-            </p>
-          </div>
-        )}
+          {createError && (
+            <div style={{ background: "rgba(255,77,106,0.08)", border: "0.5px solid rgba(255,77,106,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px" }}>
+              <p style={{ color: "var(--ab-loss)", fontSize: "13px", margin: 0 }}>{createError}</p>
+            </div>
+          )}
 
-        {/* Stats Row */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "10px 0",
-          borderTop: "0.5px solid rgba(30,111,217,0.1)",
-          borderBottom: "0.5px solid rgba(30,111,217,0.1)",
-          marginBottom: "14px",
-        }}>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: "10px", color: "#888", margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Staked</p>
-            <p style={{ fontSize: "14px", fontWeight: 700, color: "var(--ab-navy)", margin: 0, fontFamily: "var(--font-display)" }}>
-              ${formatUSDC(match.totalStakedUSDC)}
-            </p>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: "10px", color: "#888", margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Starts</p>
-            <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--ab-royal)", margin: 0 }}>
-              {formatDate(match.startTime)}
-            </p>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: "10px", color: "#888", margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Match ID</p>
-            <p style={{ fontSize: "14px", fontWeight: 700, color: "var(--ab-navy)", margin: 0, fontFamily: "var(--font-display)" }}>
-              #{match.id?.toString() ?? "—"}
-            </p>
-          </div>
-        </div>
-
-        {/* Bet Button */}
-        {isOpen ? (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowBetModal(true);
-            }}
+            onClick={handleCreate}
+            disabled={createStatus === "loading"}
             style={{
-              width: "100%",
-              background: "var(--ab-royal)",
-              color: "#fff",
-              border: "none",
-              borderRadius: "10px",
-              padding: "12px",
-              fontSize: "14px",
-              fontWeight: 600,
+              background: createStatus === "done" ? "var(--ab-win)" : "var(--ab-electric)",
+              color: "#fff", border: "none", borderRadius: "10px",
+              padding: "12px 24px", fontSize: "14px", fontWeight: 700,
               fontFamily: "var(--font-display)",
-              cursor: "pointer",
-              letterSpacing: "0.03em",
-              transition: "background 0.2s",
-              pointerEvents: "all",
-              zIndex: 10,
-              position: "relative",
+              cursor: createStatus === "loading" ? "not-allowed" : "pointer",
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = "var(--ab-electric)")}
-            onMouseLeave={e => (e.currentTarget.style.background = "var(--ab-royal)")}
           >
-            Place Bet →
+            {createStatus === "loading"
+              ? "Creating..."
+              : createStatus === "done"
+              ? "✓ Match Created!"
+              : "+ Create Match"}
           </button>
+        </div>
+
+        {/* Matches List */}
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1rem" }}>
+          All Matches ({count})
+        </p>
+
+        {count === 0 ? (
+          <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "3rem", textAlign: "center" }}>
+            <p style={{ color: "#888", fontSize: "14px" }}>No matches yet. Create one above.</p>
+          </div>
         ) : (
-          <div style={{
-            width: "100%",
-            background: "var(--ab-ice)",
-            borderRadius: "10px",
-            padding: "12px",
-            textAlign: "center",
-            fontSize: "14px",
-            color: "var(--ab-royal)",
-            fontWeight: 500,
-          }}>
-            {isResolved ? "Match Resolved" : isCancelled ? "Match Cancelled" : "Betting Closed"}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {matchIds.map((id) => (
+              <AdminMatchRow key={id.toString()} matchId={id} onAction={refetch} />
+            ))}
           </div>
         )}
       </div>
+    </main>
+  );
+}
 
-      {/* Bet Modal rendered at root level */}
-      {showBetModal && (
-        <BetModal
-          match={match}
-          onClose={() => setShowBetModal(false)}
-          onSuccess={() => {
-            setShowBetModal(false);
-            onBetPlaced?.();
-          }}
-        />
+function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () => void }) {
+  const [resolveOutcome, setResolveOutcome] = useState<string>("0");
+  const [actionStatus, setActionStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [error, setError] = useState("");
+
+  const { writeContractAsync: wc } = useWriteContract();
+  const writeContractAsync = wc as any;
+
+  const { data: raw } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ARTEMIS_ABI,
+    functionName: "getMatch",
+    args: [matchId],
+  });
+
+  if (!raw) return null;
+
+  const m = raw as any;
+  const id: bigint = BigInt(m.id ?? 0);
+  const homeTeam: string = String(m.homeTeam ?? "");
+  const awayTeam: string = String(m.awayTeam ?? "");
+  const league: string = String(m.league ?? "");
+  const status: number = Number(m.status ?? 0);
+  const totalStaked: bigint = BigInt(m.totalStakedUSDC ?? 0);
+
+  const isOpen = status === 0;
+  const isClosed = status === 1;
+
+  const doAction = async (fn: string, args: any[]) => {
+    try {
+      setError("");
+      setActionStatus("loading");
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: ARTEMIS_ABI,
+        functionName: fn,
+        args,
+      });
+      setActionStatus("done");
+      onAction();
+      setTimeout(() => setActionStatus("idle"), 2000);
+    } catch (err: any) {
+      setError(err?.message?.slice(0, 100) || "Failed");
+      setActionStatus("error");
+    }
+  };
+
+  const statusColors: Record<number, string> = {
+    0: "rgba(0,200,150,0.1)",
+    1: "rgba(255,140,0,0.1)",
+    2: "rgba(30,111,217,0.1)",
+    3: "rgba(255,77,106,0.1)",
+  };
+  const statusTextColors: Record<number, string> = {
+    0: "var(--ab-win)",
+    1: "var(--ab-live)",
+    2: "var(--ab-royal)",
+    3: "var(--ab-loss)",
+  };
+
+  return (
+    <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "14px", padding: "1.25rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+        <div>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--ab-navy)", margin: "0 0 4px" }}>
+            {homeTeam} vs {awayTeam}
+          </p>
+          <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
+            {league} · ID #{id.toString()} · Staked: ${formatUSDC(totalStaked)}
+          </p>
+        </div>
+        <span style={{
+          background: statusColors[status] ?? "var(--ab-ice)",
+          color: statusTextColors[status] ?? "var(--ab-royal)",
+          borderRadius: "20px", padding: "3px 12px",
+          fontSize: "11px", fontWeight: 600,
+        }}>
+          {statusLabels[status]}
+        </span>
+      </div>
+
+      {error && (
+        <p style={{ color: "var(--ab-loss)", fontSize: "12px", margin: "0 0 8px" }}>{error}</p>
       )}
-    </>
+
+      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+        {isOpen && (
+          <button
+            onClick={() => doAction("closeMatch", [id])}
+            disabled={actionStatus === "loading"}
+            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,140,0,0.4)", background: "rgba(255,140,0,0.08)", color: "var(--ab-live)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
+          >
+            Close Betting
+          </button>
+        )}
+
+        {isClosed && (
+          <>
+            <select
+              value={resolveOutcome}
+              onChange={(e) => setResolveOutcome(e.target.value)}
+              style={{ padding: "7px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "13px", color: "var(--ab-navy)", background: "#fff" }}
+            >
+              <option value="0">Home Win</option>
+              <option value="1">Draw</option>
+              <option value="2">Away Win</option>
+            </select>
+            <button
+              onClick={() => doAction("resolveMatch", [id, Number(resolveOutcome)])}
+              disabled={actionStatus === "loading"}
+              style={{ padding: "7px 16px", borderRadius: "8px", border: "none", background: "var(--ab-royal)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
+            >
+              {actionStatus === "loading" ? "Resolving..." : "Resolve Match"}
+            </button>
+          </>
+        )}
+
+        {(isOpen || isClosed) && (
+          <button
+            onClick={() => doAction("cancelMatch", [id])}
+            disabled={actionStatus === "loading"}
+            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,77,106,0.3)", background: "rgba(255,77,106,0.06)", color: "var(--ab-loss)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
+          >
+            Cancel Match
+          </button>
+        )}
+
+        {actionStatus === "done" && (
+          <span style={{ fontSize: "13px", color: "var(--ab-win)", fontWeight: 600 }}>✓ Done</span>
+        )}
+      </div>
+    </div>
   );
 }
