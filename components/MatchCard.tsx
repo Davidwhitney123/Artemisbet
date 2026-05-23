@@ -1,264 +1,78 @@
 "use client";
 import { useState } from "react";
-import { useReadContract, useWriteContract, useAccount } from "wagmi";
+import { useWriteContract, useAccount } from "wagmi";
 import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
-import Navbar from "@/components/Navbar";
 import { formatUSDC } from "@/lib/utils";
 
-const statusLabels = ["Open", "Closed", "Resolved", "Cancelled"];
-
-export default function AdminPage() {
-  const { address } = useAccount();
-
-  const { data: owner } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: ARTEMIS_ABI,
-    functionName: "owner",
-  });
-
-  const isOwner =
-    address &&
-    owner &&
-    address.toLowerCase() === (owner as string).toLowerCase();
-
-  const { data: matchCount, refetch } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: ARTEMIS_ABI,
-    functionName: "matchCount",
-  });
-
-  const count = matchCount ? Number(matchCount) : 0;
-  const matchIds = Array.from({ length: count }, (_, i) => BigInt(i));
-
-  const [form, setForm] = useState({
-    sport: "0",
-    homeTeam: "",
-    awayTeam: "",
-    league: "",
-    startTime: "",
-  });
-  const [createStatus, setCreateStatus] = useState<
-    "idle" | "loading" | "done" | "error"
-  >("idle");
-  const [createError, setCreateError] = useState("");
-
-  const { writeContractAsync: wc } = useWriteContract();
-  const writeContractAsync = wc as any;
-
-  const handleCreate = async () => {
-    if (!form.homeTeam || !form.awayTeam || !form.league || !form.startTime) {
-      return setCreateError("All fields are required");
-    }
-    try {
-      setCreateError("");
-      setCreateStatus("loading");
-      const startTimestamp = BigInt(
-        Math.floor(new Date(form.startTime).getTime() / 1000)
-      );
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS,
-        abi: ARTEMIS_ABI,
-        functionName: "createMatch",
-        args: [
-          Number(form.sport),
-          form.homeTeam,
-          form.awayTeam,
-          form.league,
-          startTimestamp,
-        ],
-      });
-      setCreateStatus("done");
-      setForm({ sport: "0", homeTeam: "", awayTeam: "", league: "", startTime: "" });
-      refetch();
-      setTimeout(() => setCreateStatus("idle"), 2000);
-    } catch (err: any) {
-      setCreateError(err?.message?.slice(0, 120) || "Transaction failed");
-      setCreateStatus("error");
-    }
+interface MatchCardProps {
+  match: {
+    id: bigint;
+    sport: number;
+    homeTeam: string;
+    awayTeam: string;
+    league: string;
+    startTime: bigint;
+    status: number;
+    result: number;
+    totalStakedUSDC: bigint;
   };
-
-  if (!address)
-    return (
-      <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
-        <Navbar />
-        <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
-          <p style={{ color: "#888", fontSize: "16px" }}>
-            Connect your wallet to access admin panel.
-          </p>
-        </div>
-      </main>
-    );
-
-  if (!isOwner)
-    return (
-      <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
-        <Navbar />
-        <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
-          <p style={{ fontSize: "32px", margin: "0 0 12px" }}>🔒</p>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", fontSize: "18px" }}>
-            Access Denied
-          </p>
-          <p style={{ color: "#888", fontSize: "14px" }}>
-            Only the contract owner can access this page.
-          </p>
-        </div>
-      </main>
-    );
-
-  return (
-    <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
-      <Navbar />
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2rem" }}>
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "24px", color: "var(--ab-navy)", margin: "0 0 2rem" }}>
-          ⚙ Admin Panel
-        </p>
-
-        {/* Create Match */}
-        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1.25rem" }}>
-            + Create Match
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-            <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Sport</label>
-              <select
-                value={form.sport}
-                onChange={(e) => setForm((f) => ({ ...f, sport: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", background: "#fff" }}
-              >
-                <option value="0">⚽ Football</option>
-                <option value="1">🏀 Basketball</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>League</label>
-              <input
-                placeholder="e.g. Premier League"
-                value={form.league}
-                onChange={(e) => setForm((f) => ({ ...f, league: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Home Team</label>
-              <input
-                placeholder="e.g. Arsenal"
-                value={form.homeTeam}
-                onChange={(e) => setForm((f) => ({ ...f, homeTeam: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Away Team</label>
-              <input
-                placeholder="e.g. Chelsea"
-                value={form.awayTeam}
-                onChange={(e) => setForm((f) => ({ ...f, awayTeam: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
-              />
-            </div>
-            <div style={{ gridColumn: "span 2" }}>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Start Time</label>
-              <input
-                type="datetime-local"
-                value={form.startTime}
-                onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
-              />
-            </div>
-          </div>
-
-          {createError && (
-            <div style={{ background: "rgba(255,77,106,0.08)", border: "0.5px solid rgba(255,77,106,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px" }}>
-              <p style={{ color: "var(--ab-loss)", fontSize: "13px", margin: 0 }}>{createError}</p>
-            </div>
-          )}
-
-          <button
-            onClick={handleCreate}
-            disabled={createStatus === "loading"}
-            style={{
-              background: createStatus === "done" ? "var(--ab-win)" : "var(--ab-electric)",
-              color: "#fff", border: "none", borderRadius: "10px",
-              padding: "12px 24px", fontSize: "14px", fontWeight: 700,
-              fontFamily: "var(--font-display)",
-              cursor: createStatus === "loading" ? "not-allowed" : "pointer",
-            }}
-          >
-            {createStatus === "loading"
-              ? "Creating..."
-              : createStatus === "done"
-              ? "✓ Match Created!"
-              : "+ Create Match"}
-          </button>
-        </div>
-
-        {/* Matches List */}
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1rem" }}>
-          All Matches ({count})
-        </p>
-
-        {count === 0 ? (
-          <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "3rem", textAlign: "center" }}>
-            <p style={{ color: "#888", fontSize: "14px" }}>No matches yet. Create one above.</p>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {matchIds.map((id) => (
-              <AdminMatchRow key={id.toString()} matchId={id} onAction={refetch} />
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
-  );
+  onBetPlaced?: () => void;
 }
 
-function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () => void }) {
-  const [resolveOutcome, setResolveOutcome] = useState<string>("0");
-  const [actionStatus, setActionStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [error, setError] = useState("");
+const statusLabels = ["Open", "Closed", "Resolved", "Cancelled"];
+const sportEmojis: Record<number, string> = {
+  0: "⚽",
+  1: "🏀",
+};
+
+export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
+  const { address } = useAccount();
+  const [selectedOutcome, setSelectedOutcome] = useState<string>("0");
+  const [betAmount, setBetAmount] = useState<string>("");
+  const [betStatus, setBetStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [betError, setBetError] = useState("");
 
   const { writeContractAsync: wc } = useWriteContract();
   const writeContractAsync = wc as any;
 
-  const { data: raw } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: ARTEMIS_ABI,
-    functionName: "getMatch",
-    args: [matchId],
-  });
+  const isOpen = match.status === 0;
+  const isResolved = match.status === 2;
 
-  if (!raw) return null;
+  const startDate = new Date(Number(match.startTime) * 1000);
+  const isStarted = new Date() > startDate;
 
-  const m = raw as any;
-  const id: bigint = BigInt(m.id ?? 0);
-  const homeTeam: string = String(m.homeTeam ?? "");
-  const awayTeam: string = String(m.awayTeam ?? "");
-  const league: string = String(m.league ?? "");
-  const status: number = Number(m.status ?? 0);
-  const totalStaked: bigint = BigInt(m.totalStakedUSDC ?? 0);
+  const handleBet = async () => {
+    if (!betAmount || parseFloat(betAmount) <= 0) {
+      setBetError("Enter a valid bet amount");
+      return;
+    }
 
-  const isOpen = status === 0;
-  const isClosed = status === 1;
+    if (!address) {
+      setBetError("Connect wallet first");
+      return;
+    }
 
-  const doAction = async (fn: string, args: any[]) => {
     try {
-      setError("");
-      setActionStatus("loading");
+      setBetError("");
+      setBetStatus("loading");
+
+      const amountInUSDC = BigInt(Math.floor(parseFloat(betAmount) * 1e6)); // USDC has 6 decimals
+
       await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: ARTEMIS_ABI,
-        functionName: fn,
-        args,
+        functionName: "placeBet",
+        args: [match.id, Number(selectedOutcome), amountInUSDC],
       });
-      setActionStatus("done");
-      onAction();
-      setTimeout(() => setActionStatus("idle"), 2000);
+
+      setBetStatus("done");
+      setBetAmount("");
+      setSelectedOutcome("0");
+      onBetPlaced?.();
+      setTimeout(() => setBetStatus("idle"), 2000);
     } catch (err: any) {
-      setError(err?.message?.slice(0, 100) || "Failed");
-      setActionStatus("error");
+      setBetError(err?.message?.slice(0, 100) || "Bet failed");
+      setBetStatus("error");
     }
   };
 
@@ -275,77 +89,243 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
     3: "var(--ab-loss)",
   };
 
+  const outcomeBorders: Record<string, string> = {
+    "0": "rgba(0,200,150,0.3)",
+    "1": "rgba(100,100,100,0.3)",
+    "2": "rgba(255,77,106,0.3)",
+  };
+
   return (
-    <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "14px", padding: "1.25rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+    <div style={{
+      background: "#fff",
+      border: "0.5px solid rgba(30,111,217,0.15)",
+      borderRadius: "14px",
+      padding: "1.25rem",
+    }}>
+      {/* Header */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: "1rem",
+      }}>
         <div>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--ab-navy)", margin: "0 0 4px" }}>
-            {homeTeam} vs {awayTeam}
+          <p style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: "16px",
+            color: "var(--ab-navy)",
+            margin: "0 0 4px",
+          }}>
+            {sportEmojis[match.sport] || "🎯"} {match.homeTeam} vs {match.awayTeam}
           </p>
-          <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
-            {league} · ID #{id.toString()} · Staked: ${formatUSDC(totalStaked)}
+          <p style={{
+            fontSize: "12px",
+            color: "#888",
+            margin: 0,
+          }}>
+            {match.league} · {startDate.toLocaleDateString()}
           </p>
         </div>
         <span style={{
-          background: statusColors[status] ?? "var(--ab-ice)",
-          color: statusTextColors[status] ?? "var(--ab-royal)",
-          borderRadius: "20px", padding: "3px 12px",
-          fontSize: "11px", fontWeight: 600,
+          background: statusColors[match.status] ?? "var(--ab-ice)",
+          color: statusTextColors[match.status] ?? "var(--ab-royal)",
+          borderRadius: "20px",
+          padding: "3px 12px",
+          fontSize: "11px",
+          fontWeight: 600,
         }}>
-          {statusLabels[status]}
+          {statusLabels[match.status]}
         </span>
       </div>
 
-      {error && (
-        <p style={{ color: "var(--ab-loss)", fontSize: "12px", margin: "0 0 8px" }}>{error}</p>
+      {/* Total Staked */}
+      <div style={{
+        background: "rgba(30,111,217,0.05)",
+        borderRadius: "8px",
+        padding: "8px 12px",
+        marginBottom: "1rem",
+      }}>
+        <p style={{
+          fontSize: "12px",
+          color: "#888",
+          margin: "0 0 4px",
+        }}>
+          Total Pool
+        </p>
+        <p style={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 700,
+          fontSize: "18px",
+          color: "var(--ab-royal)",
+          margin: 0,
+        }}>
+          ${formatUSDC(match.totalStakedUSDC)}
+        </p>
+      </div>
+
+      {/* Result Display (if resolved) */}
+      {isResolved && (
+        <div style={{
+          background: "rgba(0,200,150,0.08)",
+          border: "0.5px solid rgba(0,200,150,0.2)",
+          borderRadius: "8px",
+          padding: "10px 12px",
+          marginBottom: "1rem",
+        }}>
+          <p style={{
+            fontSize: "12px",
+            color: "#888",
+            margin: "0 0 4px",
+          }}>
+            Result
+          </p>
+          <p style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: "14px",
+            color: "var(--ab-win)",
+            margin: 0,
+          }}>
+            {match.result === 0 ? "🏆 Home Win" : match.result === 1 ? "🤝 Draw" : "🏆 Away Win"}
+          </p>
+        </div>
       )}
 
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
-        {isOpen && (
+      {/* Betting Interface */}
+      {isOpen && !isStarted && (
+        <div>
+          {/* Outcome Selection */}
+          <div style={{ marginBottom: "1rem" }}>
+            <p style={{
+              fontSize: "12px",
+              color: "#888",
+              fontWeight: 500,
+              margin: "0 0 8px",
+            }}>
+              Predict
+            </p>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "8px",
+            }}>
+              {["0", "1", "2"].map((outcome, idx) => {
+                const labels = ["Home Win", "Draw", "Away Win"];
+                const isSelected = selectedOutcome === outcome;
+                return (
+                  <button
+                    key={outcome}
+                    onClick={() => setSelectedOutcome(outcome)}
+                    style={{
+                      padding: "10px 12px",
+                      borderRadius: "8px",
+                      border: `1px solid ${isSelected ? "var(--ab-electric)" : outcomeBorders[outcome]}`,
+                      background: isSelected ? "rgba(123,181,255,0.1)" : "#fff",
+                      color: isSelected ? "var(--ab-electric)" : "var(--ab-navy)",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    {labels[idx]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Amount Input */}
+          <div style={{ marginBottom: "1rem" }}>
+            <p style={{
+              fontSize: "12px",
+              color: "#888",
+              fontWeight: 500,
+              margin: "0 0 8px",
+            }}>
+              Bet Amount (USDC)
+            </p>
+            <input
+              type="number"
+              placeholder="0.00"
+              value={betAmount}
+              onChange={(e) => setBetAmount(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: "1px solid rgba(30,111,217,0.25)",
+                fontSize: "14px",
+                color: "var(--ab-navy)",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+
+          {/* Error */}
+          {betError && (
+            <div style={{
+              background: "rgba(255,77,106,0.08)",
+              border: "0.5px solid rgba(255,77,106,0.3)",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              marginBottom: "1rem",
+            }}>
+              <p style={{
+                color: "var(--ab-loss)",
+                fontSize: "12px",
+                margin: 0,
+              }}>
+                {betError}
+              </p>
+            </div>
+          )}
+
+          {/* Bet Button */}
           <button
-            onClick={() => doAction("closeMatch", [id])}
-            disabled={actionStatus === "loading"}
-            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,140,0,0.4)", background: "rgba(255,140,0,0.08)", color: "var(--ab-live)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
+            onClick={handleBet}
+            disabled={betStatus === "loading" || !address}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              borderRadius: "10px",
+              border: "none",
+              background: betStatus === "done" ? "var(--ab-win)" : "var(--ab-electric)",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: 700,
+              fontFamily: "var(--font-display)",
+              cursor: betStatus === "loading" || !address ? "not-allowed" : "pointer",
+              opacity: betStatus === "loading" || !address ? 0.6 : 1,
+            }}
           >
-            Close Betting
+            {betStatus === "loading"
+              ? "Placing Bet..."
+              : betStatus === "done"
+              ? "✓ Bet Placed!"
+              : "Place Bet"}
           </button>
-        )}
+        </div>
+      )}
 
-        {isClosed && (
-          <>
-            <select
-              value={resolveOutcome}
-              onChange={(e) => setResolveOutcome(e.target.value)}
-              style={{ padding: "7px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "13px", color: "var(--ab-navy)", background: "#fff" }}
-            >
-              <option value="0">Home Win</option>
-              <option value="1">Draw</option>
-              <option value="2">Away Win</option>
-            </select>
-            <button
-              onClick={() => doAction("resolveMatch", [id, Number(resolveOutcome)])}
-              disabled={actionStatus === "loading"}
-              style={{ padding: "7px 16px", borderRadius: "8px", border: "none", background: "var(--ab-royal)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
-            >
-              {actionStatus === "loading" ? "Resolving..." : "Resolve Match"}
-            </button>
-          </>
-        )}
-
-        {(isOpen || isClosed) && (
-          <button
-            onClick={() => doAction("cancelMatch", [id])}
-            disabled={actionStatus === "loading"}
-            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,77,106,0.3)", background: "rgba(255,77,106,0.06)", color: "var(--ab-loss)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
-          >
-            Cancel Match
-          </button>
-        )}
-
-        {actionStatus === "done" && (
-          <span style={{ fontSize: "13px", color: "var(--ab-win)", fontWeight: 600 }}>✓ Done</span>
-        )}
-      </div>
+      {/* Match Not Open */}
+      {!isOpen && (
+        <div style={{
+          textAlign: "center",
+          padding: "12px",
+          background: "rgba(100,100,100,0.05)",
+          borderRadius: "8px",
+        }}>
+          <p style={{
+            fontSize: "13px",
+            color: "#888",
+            margin: 0,
+          }}>
+            {isStarted ? "⏱️ Betting closed" : "Match cancelled or resolved"}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
