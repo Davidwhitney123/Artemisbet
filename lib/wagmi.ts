@@ -23,6 +23,12 @@ export const arcTestnet = {
       url: "https://testnet.arcscan.app",
     },
   },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11" as `0x${string}`,
+      blockCreated: 0,
+    },
+  },
   testnet: true,
 } as const;
 
@@ -43,3 +49,9 @@ export const config = createConfig(
     appUrl: "https://artemisbet.vercel.app",
   })
 );
+
+export const CONTRACT_ADDRESS = process.env
+  .NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
+
+export const USDC_ADDRESS = process.env
+  .NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`;
