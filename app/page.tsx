@@ -1,4 +1,5 @@
 "use client";
+import type { ComponentType } from "react";
 import { useReadContract } from "wagmi";
 import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
 import Navbar from "@/components/Navbar";
@@ -7,6 +8,21 @@ import DepositWithdraw from "@/components/DepositWithdraw";
 import UserBets from "@/components/UserBets";
 import LiveMatches from "@/components/LiveMatches";
 import { useAccount } from "wagmi";
+
+const MatchCardWithProps = MatchCard as unknown as ComponentType<{
+  match: {
+    id: bigint;
+    sport: number;
+    homeTeam: string;
+    awayTeam: string;
+    league: string;
+    startTime: bigint;
+    status: number;
+    result: number;
+    totalStakedUSDC: bigint;
+  };
+  onBetPlaced?: () => void;
+}>;
 
 export default function Home() {
   const { isConnected } = useAccount();
@@ -150,17 +166,17 @@ function MatchItem({ matchId, onBetPlaced }: { matchId: bigint; onBetPlaced?: ()
   const match = raw as any;
 
   return (
-    <MatchCard
+    <MatchCardWithProps
       match={{
-        id: match[0],
-        sport: Number(match[1]),
-        homeTeam: match[2],
-        awayTeam: match[3],
-        league: match[4],
-        startTime: match[5],
-        status: Number(match[6]),
-        result: Number(match[7]),
-        totalStakedUSDC: match[8],
+        id: BigInt(match.id ?? 0),
+        sport: Number(match.sport ?? 0),
+        homeTeam: String(match.homeTeam ?? ""),
+        awayTeam: String(match.awayTeam ?? ""),
+        league: String(match.league ?? ""),
+        startTime: BigInt(match.startTime ?? 0),
+        status: Number(match.status ?? 0),
+        result: Number(match.result ?? 0),
+        totalStakedUSDC: BigInt(match.totalStakedUSDC ?? 0),
       }}
       onBetPlaced={onBetPlaced}
     />
