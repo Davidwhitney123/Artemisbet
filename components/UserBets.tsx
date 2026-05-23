@@ -11,7 +11,7 @@ export default function UserBets() {
   const { address } = useAccount();
   const [claiming, setClaiming] = useState<number | null>(null);
   const { writeContractAsync: writeContract } = useWriteContract();
-const writeContractAsync = writeContract as any;
+  const writeContractAsync = writeContract as any;
 
   const { data: betIds, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
@@ -78,21 +78,33 @@ function BetRow({ betId, onClaim, isClaiming }: {
     args: [betId],
   });
 
+  const bet = rawBet as any;
+  const matchId = bet?.matchId ?? bet?.[1];
+
   const { data: rawMatch } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: ARTEMIS_ABI,
     functionName: "getMatch",
-    args: rawBet ? [(rawBet as any)[1]] : undefined,
+    args: matchId !== undefined ? [matchId] : undefined,
   });
 
   if (!rawBet || !rawMatch) return null;
 
-  const [bettor, matchId, prediction, amountUSDC, claimed] = rawBet as any;
-  const [id, sport, homeTeam, awayTeam, league, startTime, status, result] = rawMatch as any;
+  // Use named fields for bet tuple
+  const prediction = bet?.prediction ?? bet?.[2];
+  const amountUSDC = bet?.amountUSDC ?? bet?.[3];
+  const claimed = bet?.claimed ?? bet?.[4];
+
+  // Use named fields for match tuple
+  const m = rawMatch as any;
+  const homeTeam = String(m?.homeTeam ?? m?.[2] ?? "");
+  const awayTeam = String(m?.awayTeam ?? m?.[3] ?? "");
+  const status = Number(m?.status ?? m?.[6] ?? 0);
+  const result = Number(m?.result ?? m?.[7] ?? 0);
 
   const isResolved = status === 2;
   const isCancelled = status === 3;
-  const isWinner = isResolved && Number(prediction) === Number(result);
+  const isWinner = isResolved && Number(prediction) === result;
   const canClaim = (isWinner || isCancelled) && !claimed;
 
   return (
@@ -107,7 +119,7 @@ function BetRow({ betId, onClaim, isClaiming }: {
           {homeTeam} vs {awayTeam}
         </p>
         <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
-          Bet: {outcomeLabels[Number(prediction)]} · ${formatUSDC(amountUSDC)} USDC
+          Bet: {outcomeLabels[Number(prediction)]} · ${formatUSDC(BigInt(amountUSDC ?? 0))} USDC
         </p>
       </div>
       <div style={{ textAlign: "right" }}>
