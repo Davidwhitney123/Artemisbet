@@ -1,11 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useReadContract, useWriteContract, useAccount } from "wagmi";
 import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
 import Navbar from "@/components/Navbar";
 import { formatUSDC } from "@/lib/utils";
 
 const statusLabels = ["Open", "Closed", "Resolved", "Cancelled"];
+
+interface ApiFixture {
+  id: string;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  league: string;
+  startTime: string;
+  odds: { home: number | null; draw: number | null; away: number | null } | null;
+}
 
 export default function AdminPage() {
   const { address } = useAccount();
@@ -37,13 +47,27 @@ export default function AdminPage() {
     league: "",
     startTime: "",
   });
-  const [createStatus, setCreateStatus] = useState<
-    "idle" | "loading" | "done" | "error"
-  >("idle");
+  const [createStatus, setCreateStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [createError, setCreateError] = useState("");
+
+  // Live fixtures from API
+  const [fixtures, setFixtures] = useState<ApiFixture[]>([]);
+  const [fixturesLoading, setFixturesLoading] = useState(true);
+  const [importingId, setImportingId] = useState<string | null>(null);
+  const [importedIds, setImportedIds] = useState<Set<string>>(new Set());
 
   const { writeContractAsync: wc } = useWriteContract();
   const writeContractAsync = wc as any;
+
+  useEffect(() => {
+    fetch("/api/matches")
+      .then(r => r.json())
+      .then(data => {
+        setFixtures(data.upcoming ?? []);
+        setFixturesLoading(false);
+      })
+      .catch(() => setFixturesLoading(false));
+  }, []);
 
   const handleCreate = async () => {
     if (!form.homeTeam || !form.awayTeam || !form.league || !form.startTime) {
@@ -59,13 +83,7 @@ export default function AdminPage() {
         address: CONTRACT_ADDRESS,
         abi: ARTEMIS_ABI,
         functionName: "createMatch",
-        args: [
-          Number(form.sport),
-          form.homeTeam,
-          form.awayTeam,
-          form.league,
-          startTimestamp,
-        ],
+        args: [Number(form.sport), form.homeTeam, form.awayTeam, form.league, startTimestamp],
       });
       setCreateStatus("done");
       setForm({ sport: "0", homeTeam: "", awayTeam: "", league: "", startTime: "" });
@@ -77,14 +95,32 @@ export default function AdminPage() {
     }
   };
 
+  const handleImport = async (fixture: ApiFixture) => {
+    try {
+      setImportingId(fixture.id);
+      const sportNum = fixture.sport === "basketball" ? 1 : 0;
+      const startTimestamp = BigInt(Math.floor(new Date(fixture.startTime).getTime() / 1000));
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: ARTEMIS_ABI,
+        functionName: "createMatch",
+        args: [sportNum, fixture.homeTeam, fixture.awayTeam, fixture.league, startTimestamp],
+      });
+      setImportedIds(prev => new Set([...prev, fixture.id]));
+      refetch();
+    } catch (err: any) {
+      alert(err?.message?.slice(0, 120) || "Import failed");
+    } finally {
+      setImportingId(null);
+    }
+  };
+
   if (!address)
     return (
       <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
         <Navbar />
         <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
-          <p style={{ color: "#888", fontSize: "16px" }}>
-            Connect your wallet to access admin panel.
-          </p>
+          <p style={{ color: "#888", fontSize: "16px" }}>Connect your wallet to access admin panel.</p>
         </div>
       </main>
     );
@@ -95,12 +131,8 @@ export default function AdminPage() {
         <Navbar />
         <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
           <p style={{ fontSize: "32px", margin: "0 0 12px" }}>🔒</p>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", fontSize: "18px" }}>
-            Access Denied
-          </p>
-          <p style={{ color: "#888", fontSize: "14px" }}>
-            Only the contract owner can access this page.
-          </p>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", fontSize: "18px" }}>Access Denied</p>
+          <p style={{ color: "#888", fontSize: "14px" }}>Only the contract owner can access this page.</p>
         </div>
       </main>
     );
@@ -113,10 +145,93 @@ export default function AdminPage() {
           ⚙ Admin Panel
         </p>
 
-        {/* Create Match */}
+        {/* Import from Live Fixtures */}
+        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+            <div>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 2px" }}>
+                ⚡ Import from Live Fixtures
+              </p>
+              <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
+                One-click import upcoming matches directly to the contract
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setFixturesLoading(true);
+                fetch("/api/matches")
+                  .then(r => r.json())
+                  .then(data => { setFixtures(data.upcoming ?? []); setFixturesLoading(false); })
+                  .catch(() => setFixturesLoading(false));
+              }}
+              style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.2)", background: "var(--ab-ice)", color: "var(--ab-royal)", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+            >
+              🔄 Refresh
+            </button>
+          </div>
+
+          {fixturesLoading ? (
+            <p style={{ color: "#888", fontSize: "14px", textAlign: "center", padding: "1rem" }}>Loading fixtures...</p>
+          ) : fixtures.length === 0 ? (
+            <p style={{ color: "#888", fontSize: "14px", textAlign: "center", padding: "1rem" }}>No upcoming fixtures available right now.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {fixtures.map(fixture => {
+                const isImported = importedIds.has(fixture.id);
+                const isImporting = importingId === fixture.id;
+                const startDate = new Date(fixture.startTime);
+                return (
+                  <div key={fixture.id} style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "12px 16px", borderRadius: "12px",
+                    background: isImported ? "rgba(0,200,150,0.04)" : "var(--ab-ice)",
+                    border: `0.5px solid ${isImported ? "rgba(0,200,150,0.2)" : "rgba(30,111,217,0.1)"}`,
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
+                        <span style={{ fontSize: "11px", color: "var(--ab-royal)", fontWeight: 500 }}>
+                          {fixture.league}
+                        </span>
+                        <span style={{ fontSize: "11px", color: "#aaa" }}>
+                          {startDate.toLocaleDateString()} {startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-navy)", margin: "0 0 4px" }}>
+                        {fixture.homeTeam} vs {fixture.awayTeam}
+                      </p>
+                      {fixture.odds && (
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          {fixture.odds.home && <span style={{ fontSize: "11px", color: "var(--ab-win)", fontWeight: 600 }}>H: {fixture.odds.home}</span>}
+                          {fixture.odds.draw && <span style={{ fontSize: "11px", color: "var(--ab-royal)", fontWeight: 600 }}>D: {fixture.odds.draw}</span>}
+                          {fixture.odds.away && <span style={{ fontSize: "11px", color: "var(--ab-live)", fontWeight: 600 }}>A: {fixture.odds.away}</span>}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleImport(fixture)}
+                      disabled={isImporting || isImported}
+                      style={{
+                        padding: "8px 16px", borderRadius: "8px", border: "none",
+                        background: isImported ? "var(--ab-win)" : isImporting ? "rgba(30,111,217,0.3)" : "var(--ab-electric)",
+                        color: "#fff", fontSize: "13px", fontWeight: 700,
+                        cursor: isImporting || isImported ? "not-allowed" : "pointer",
+                        whiteSpace: "nowrap", marginLeft: "12px",
+                        fontFamily: "var(--font-display)",
+                      }}
+                    >
+                      {isImported ? "✓ Imported" : isImporting ? "Importing..." : "⚡ Import"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Manual Create Match */}
         <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
           <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1.25rem" }}>
-            + Create Match
+            + Create Match Manually
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
@@ -186,11 +301,7 @@ export default function AdminPage() {
               cursor: createStatus === "loading" ? "not-allowed" : "pointer",
             }}
           >
-            {createStatus === "loading"
-              ? "Creating..."
-              : createStatus === "done"
-              ? "✓ Match Created!"
-              : "+ Create Match"}
+            {createStatus === "loading" ? "Creating..." : createStatus === "done" ? "✓ Match Created!" : "+ Create Match"}
           </button>
         </div>
 
@@ -201,7 +312,7 @@ export default function AdminPage() {
 
         {count === 0 ? (
           <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "3rem", textAlign: "center" }}>
-            <p style={{ color: "#888", fontSize: "14px" }}>No matches yet. Create one above.</p>
+            <p style={{ color: "#888", fontSize: "14px" }}>No matches yet. Import or create one above.</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -247,12 +358,7 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
     try {
       setError("");
       setActionStatus("loading");
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS,
-        abi: ARTEMIS_ABI,
-        functionName: fn,
-        args,
-      });
+      await writeContractAsync({ address: CONTRACT_ADDRESS, abi: ARTEMIS_ABI, functionName: fn, args });
       setActionStatus("done");
       onAction();
       setTimeout(() => setActionStatus("idle"), 2000);
@@ -263,16 +369,12 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
   };
 
   const statusColors: Record<number, string> = {
-    0: "rgba(0,200,150,0.1)",
-    1: "rgba(255,140,0,0.1)",
-    2: "rgba(30,111,217,0.1)",
-    3: "rgba(255,77,106,0.1)",
+    0: "rgba(0,200,150,0.1)", 1: "rgba(255,140,0,0.1)",
+    2: "rgba(30,111,217,0.1)", 3: "rgba(255,77,106,0.1)",
   };
   const statusTextColors: Record<number, string> = {
-    0: "var(--ab-win)",
-    1: "var(--ab-live)",
-    2: "var(--ab-royal)",
-    3: "var(--ab-loss)",
+    0: "var(--ab-win)", 1: "var(--ab-live)",
+    2: "var(--ab-royal)", 3: "var(--ab-loss)",
   };
 
   return (
@@ -296,55 +398,36 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
         </span>
       </div>
 
-      {error && (
-        <p style={{ color: "var(--ab-loss)", fontSize: "12px", margin: "0 0 8px" }}>{error}</p>
-      )}
+      {error && <p style={{ color: "var(--ab-loss)", fontSize: "12px", margin: "0 0 8px" }}>{error}</p>}
 
       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
         {isOpen && (
-          <button
-            onClick={() => doAction("closeMatch", [id])}
-            disabled={actionStatus === "loading"}
-            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,140,0,0.4)", background: "rgba(255,140,0,0.08)", color: "var(--ab-live)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
-          >
+          <button onClick={() => doAction("closeMatch", [id])} disabled={actionStatus === "loading"}
+            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,140,0,0.4)", background: "rgba(255,140,0,0.08)", color: "var(--ab-live)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
             Close Betting
           </button>
         )}
-
         {isClosed && (
           <>
-            <select
-              value={resolveOutcome}
-              onChange={(e) => setResolveOutcome(e.target.value)}
-              style={{ padding: "7px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "13px", color: "var(--ab-navy)", background: "#fff" }}
-            >
+            <select value={resolveOutcome} onChange={(e) => setResolveOutcome(e.target.value)}
+              style={{ padding: "7px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "13px", color: "var(--ab-navy)", background: "#fff" }}>
               <option value="0">Home Win</option>
               <option value="1">Draw</option>
               <option value="2">Away Win</option>
             </select>
-            <button
-              onClick={() => doAction("resolveMatch", [id, Number(resolveOutcome)])}
-              disabled={actionStatus === "loading"}
-              style={{ padding: "7px 16px", borderRadius: "8px", border: "none", background: "var(--ab-royal)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
-            >
+            <button onClick={() => doAction("resolveMatch", [id, Number(resolveOutcome)])} disabled={actionStatus === "loading"}
+              style={{ padding: "7px 16px", borderRadius: "8px", border: "none", background: "var(--ab-royal)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
               {actionStatus === "loading" ? "Resolving..." : "Resolve Match"}
             </button>
           </>
         )}
-
         {(isOpen || isClosed) && (
-          <button
-            onClick={() => doAction("cancelMatch", [id])}
-            disabled={actionStatus === "loading"}
-            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,77,106,0.3)", background: "rgba(255,77,106,0.06)", color: "var(--ab-loss)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
-          >
+          <button onClick={() => doAction("cancelMatch", [id])} disabled={actionStatus === "loading"}
+            style={{ padding: "7px 16px", borderRadius: "8px", border: "1px solid rgba(255,77,106,0.3)", background: "rgba(255,77,106,0.06)", color: "var(--ab-loss)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
             Cancel Match
           </button>
         )}
-
-        {actionStatus === "done" && (
-          <span style={{ fontSize: "13px", color: "var(--ab-win)", fontWeight: 600 }}>✓ Done</span>
-        )}
+        {actionStatus === "done" && <span style={{ fontSize: "13px", color: "var(--ab-win)", fontWeight: 600 }}>✓ Done</span>}
       </div>
     </div>
   );
