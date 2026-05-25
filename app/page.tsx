@@ -1,5 +1,4 @@
 "use client";
-import type { ComponentType } from "react";
 import { useReadContract } from "wagmi";
 import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
 import Navbar from "@/components/Navbar";
@@ -9,21 +8,6 @@ import UserBets from "@/components/UserBets";
 import LiveMatches from "@/components/LiveMatches";
 import { useAccount } from "wagmi";
 
-const MatchCardWithProps = MatchCard as unknown as ComponentType<{
-  match: {
-    id: bigint;
-    sport: number;
-    homeTeam: string;
-    awayTeam: string;
-    league: string;
-    startTime: bigint;
-    status: number;
-    result: number;
-    totalStakedUSDC: bigint;
-  };
-  onBetPlaced?: () => void;
-}>;
-
 export default function Home() {
   const { isConnected } = useAccount();
 
@@ -31,9 +15,7 @@ export default function Home() {
     address: CONTRACT_ADDRESS,
     abi: ARTEMIS_ABI,
     functionName: "matchCount",
-    query: {
-      refetchInterval: 5000,
-    },
+    query: { refetchInterval: 5000 },
   });
 
   const count = matchCount ? Number(matchCount) : 0;
@@ -70,7 +52,6 @@ export default function Home() {
         gap: "2rem",
         alignItems: "start",
       }}>
-
         {/* Left: Live Scores + Matches */}
         <div>
           <LiveMatches />
@@ -80,33 +61,10 @@ export default function Home() {
             fontSize: "20px", color: "var(--ab-navy)",
             margin: "0 0 1rem",
           }}>
-            {count > 0 ? `${count} Active Match${count > 1 ? "es" : ""}` : "Upcoming Matches"}
+            Active Matches
           </p>
 
-          {count === 0 ? (
-            <div style={{
-              background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)",
-              borderRadius: "16px", padding: "3rem", textAlign: "center",
-            }}>
-              <p style={{ fontSize: "32px", margin: "0 0 8px" }}>⚽</p>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", margin: "0 0 4px" }}>
-                No Matches Yet
-              </p>
-              <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>
-                The admin will add matches soon. Check back later!
-              </p>
-            </div>
-          ) : (
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "1rem",
-            }}>
-              {matchIds.map(id => (
-                <MatchItem key={id.toString()} matchId={id} onBetPlaced={refetchCount} />
-              ))}
-            </div>
-          )}
+          <ActiveMatches matchIds={matchIds} onBetPlaced={refetchCount} />
         </div>
 
         {/* Right: Wallet + Bets (only when connected) */}
@@ -130,15 +88,44 @@ export default function Home() {
   );
 }
 
+function ActiveMatches({ matchIds, onBetPlaced }: { matchIds: bigint[]; onBetPlaced?: () => void }) {
+  if (matchIds.length === 0) {
+    return (
+      <div style={{
+        background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)",
+        borderRadius: "16px", padding: "3rem", textAlign: "center",
+      }}>
+        <p style={{ fontSize: "32px", margin: "0 0 8px" }}>⚽</p>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", margin: "0 0 4px" }}>
+          No Matches Yet
+        </p>
+        <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>
+          The admin will add matches soon. Check back later!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+      gap: "1rem",
+    }}>
+      {matchIds.map(id => (
+        <MatchItem key={id.toString()} matchId={id} onBetPlaced={onBetPlaced} />
+      ))}
+    </div>
+  );
+}
+
 function MatchItem({ matchId, onBetPlaced }: { matchId: bigint; onBetPlaced?: () => void }) {
   const { data: raw, isLoading, isError } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: ARTEMIS_ABI,
     functionName: "getMatch",
     args: [matchId],
-    query: {
-      refetchInterval: 5000,
-    },
+    query: { refetchInterval: 5000 },
   });
 
   if (isLoading) return (
@@ -164,9 +151,13 @@ function MatchItem({ matchId, onBetPlaced }: { matchId: bigint; onBetPlaced?: ()
   );
 
   const match = raw as any;
+  const status = Number(match?.status ?? 0);
+
+  // Hide resolved (2) and cancelled (3) matches from home page
+  if (status === 2 || status === 3) return null;
 
   return (
-    <MatchCardWithProps
+    <MatchCard
       match={{
         id: BigInt(match.id ?? 0),
         sport: Number(match.sport ?? 0),
