@@ -31,6 +31,7 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
   const [betAmount, setBetAmount] = useState<string>("");
   const [betStatus, setBetStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [betError, setBetError] = useState("");
+  const [showPayoutInfo, setShowPayoutInfo] = useState(false);
 
   const { writeContractAsync: wc } = useWriteContract();
   const writeContractAsync = wc as any;
@@ -195,6 +196,67 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
       {/* Betting Interface */}
       {isOpen && !isStarted && (
         <div>
+          {/* How payouts work info box */}
+          <div style={{
+            background: "rgba(30,111,217,0.04)",
+            border: "0.5px solid rgba(30,111,217,0.15)",
+            borderRadius: "10px",
+            padding: "10px 14px",
+            marginBottom: "1rem",
+          }}>
+            <button
+              onClick={() => setShowPayoutInfo(!showPayoutInfo)}
+              style={{
+                width: "100%",
+                background: "none",
+                border: "none",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "var(--ab-royal)", fontWeight: 600 }}>
+                💡 How payouts work
+              </span>
+              <span style={{ fontSize: "12px", color: "var(--ab-royal)" }}>
+                {showPayoutInfo ? "▲" : "▼"}
+              </span>
+            </button>
+
+            {showPayoutInfo && (
+              <div style={{ marginTop: "10px", fontSize: "12px", color: "#555", lineHeight: "1.7" }}>
+                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.6)", borderRadius: "6px" }}>
+                  <p style={{ margin: "0 0 4px", fontWeight: 500 }}>
+                    ✅ <strong>How it works:</strong>
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    If your pick wins, you split the entire betting pool with other winners. The more you bet, the bigger your share.
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.6)", borderRadius: "6px" }}>
+                  <p style={{ margin: "0 0 4px", fontWeight: 500 }}>
+                    📊 <strong>Quick example:</strong>
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: "18px" }}>
+                    <li>Total pool: $100</li>
+                    <li>You bet: $20 (on winning side)</li>
+                    <li>Others on winning side: $30</li>
+                    <li>Your share: ($20 ÷ $50) × $100 = <strong>$40</strong></li>
+                  </ul>
+                </div>
+
+                <div style={{ padding: "8px", background: "rgba(0,200,150,0.08)", borderRadius: "6px", border: "0.5px solid rgba(0,200,150,0.2)" }}>
+                  <p style={{ margin: 0, fontWeight: 500 }}>
+                    🎯 <strong>Pro tip:</strong> Pick an outcome fewer people expect = bigger potential payout!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Outcome Selection */}
           <div style={{ marginBottom: "1rem" }}>
             <p style={{
