@@ -186,16 +186,33 @@ export default function BetModal({ match, onClose, onSuccess }: BetModalProps) {
             </button>
 
             {showPayoutInfo && (
-              <div style={{ marginTop: "10px", fontSize: "12px", color: "#555", lineHeight: "1.6" }}>
-                <p style={{ margin: "0 0 6px" }}>
-                  🏆 <strong>Winners split the entire pool</strong> proportionally based on how much they staked.
-                </p>
-                <p style={{ margin: "0 0 6px" }}>
-                  📊 <strong>Example:</strong> Pool = $100. You bet $20 on the winning side out of $40 total on that side. You get 50% of the pool = <strong>$50</strong> (minus a small 2% fee).
-                </p>
-                <p style={{ margin: 0 }}>
-                  🎯 <strong>The fewer people who pick correctly, the bigger your winnings!</strong>
-                </p>
+              <div style={{ marginTop: "10px", fontSize: "12px", color: "#555", lineHeight: "1.7" }}>
+                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.6)", borderRadius: "6px" }}>
+                  <p style={{ margin: "0 0 4px", fontWeight: 500 }}>
+                    ✅ <strong>How it works:</strong>
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    If your pick wins, you split the entire betting pool with other winners. The more you bet, the bigger your share.
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.6)", borderRadius: "6px" }}>
+                  <p style={{ margin: "0 0 4px", fontWeight: 500 }}>
+                    📊 <strong>Quick example:</strong>
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: "18px" }}>
+                    <li>Total pool: $100</li>
+                    <li>You bet: $20 (on winning side)</li>
+                    <li>Others on winning side: $30</li>
+                    <li>Your share: ($20 ÷ $50) × $100 = <strong>$40</strong></li>
+                  </ul>
+                </div>
+
+                <div style={{ padding: "8px", background: "rgba(0,200,150,0.08)", borderRadius: "6px", border: "0.5px solid rgba(0,200,150,0.2)" }}>
+                  <p style={{ margin: 0, fontWeight: 500 }}>
+                    🎯 <strong>Pro tip:</strong> Pick an outcome fewer people expect = bigger potential payout!
+                  </p>
+                </div>
               </div>
             )}
           </div>
