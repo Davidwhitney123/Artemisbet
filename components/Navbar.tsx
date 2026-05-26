@@ -44,78 +44,102 @@ export default function Navbar() {
 
   return (
     <>
+      <style>{`
+        .desktop-nav { display: flex; }
+        .mobile-right { display: none; }
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .mobile-right { display: flex !important; }
+          .navbar-inner { padding: 0 1rem !important; }
+        }
+        /* Force ConnectKit button to not overflow */
+        [data-testid="connect-button"], 
+        .ck-button,
+        w3m-button,
+        button[class*="connect"] {
+          max-width: 140px !important;
+          font-size: 13px !important;
+        }
+      `}</style>
+
       <nav style={{
         background: "var(--ab-navy)",
-        padding: "0 2rem",
-        height: "64px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
         position: "sticky",
         top: 0,
         zIndex: 100,
         boxShadow: "0 2px 20px rgba(10,31,92,0.3)",
+        width: "100%",
       }}>
-        {/* Logo */}
-        <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-          <span style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800, fontSize: "20px",
-            color: "#fff", letterSpacing: "0.06em",
-          }}>
-            ARTEMIS <span style={{ color: "var(--ab-sky)" }}>BET</span>
-          </span>
-        </Link>
+        <div className="navbar-inner" style={{
+          padding: "0 2rem",
+          height: "64px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          maxWidth: "100%",
+          overflow: "hidden",
+        }}>
+          {/* Logo */}
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+            <span style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 800, fontSize: "18px",
+              color: "#fff", letterSpacing: "0.06em",
+            }}>
+              ARTEMIS <span style={{ color: "var(--ab-sky)" }}>BET</span>
+            </span>
+          </Link>
 
-        {/* Desktop Links */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }} className="desktop-nav">
-          <style>{`
-            @media (max-width: 768px) { .desktop-nav { display: none !important; } .mobile-menu-btn { display: flex !important; } }
-            @media (min-width: 769px) { .mobile-menu-btn { display: none !important; } }
-          `}</style>
-          <Link href="/" style={linkStyle("/")}>⚽ Matches</Link>
-          <Link href="/leaderboard" style={linkStyle("/leaderboard")}>🏆 Leaderboard</Link>
-          <Link href="/history" style={linkStyle("/history")}>📋 History</Link>
-          {isConnected && (
-            <>
-              <Link href="/bets" style={linkStyle("/bets")}>My Bets</Link>
-              <Link href="/profile" style={linkStyle("/profile")}>👤 Profile</Link>
-              <Link href="/wallet" style={linkStyle("/wallet")}>Wallet</Link>
-              {isOwner && (
-                <Link href="/admin" style={{ ...linkStyle("/admin"), color: "var(--ab-sky)" }}>⚙ Admin</Link>
-              )}
-            </>
-          )}
-          <ConnectKitButton />
-        </div>
+          {/* Desktop Links */}
+          <div className="desktop-nav" style={{ alignItems: "center", gap: "1.5rem" }}>
+            <Link href="/" style={linkStyle("/")}>⚽ Matches</Link>
+            <Link href="/leaderboard" style={linkStyle("/leaderboard")}>🏆 Leaderboard</Link>
+            <Link href="/history" style={linkStyle("/history")}>📋 History</Link>
+            {isConnected && (
+              <>
+                <Link href="/bets" style={linkStyle("/bets")}>My Bets</Link>
+                <Link href="/profile" style={linkStyle("/profile")}>👤 Profile</Link>
+                <Link href="/wallet" style={linkStyle("/wallet")}>Wallet</Link>
+                {isOwner && (
+                  <Link href="/admin" style={{ ...linkStyle("/admin"), color: "var(--ab-sky)" }}>⚙ Admin</Link>
+                )}
+              </>
+            )}
+            <ConnectKitButton />
+          </div>
 
-        {/* Mobile: Connect + Hamburger */}
-        <div className="mobile-menu-btn" style={{ display: "none", alignItems: "center", gap: "10px" }}>
-          <ConnectKitButton />
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            style={{
-              background: "rgba(255,255,255,0.1)", border: "none",
-              borderRadius: "8px", padding: "8px", cursor: "pointer",
-              color: "#fff", fontSize: "18px", lineHeight: 1,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: "36px", height: "36px",
-            }}
-          >
-            {menuOpen ? "✕" : "☰"}
-          </button>
+          {/* Mobile Right: Hamburger only */}
+          <div className="mobile-right" style={{ alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                background: "rgba(255,255,255,0.1)", border: "none",
+                borderRadius: "8px", padding: "8px 10px", cursor: "pointer",
+                color: "#fff", fontSize: "20px", lineHeight: 1,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              {menuOpen ? "✕" : "☰"}
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Mobile Dropdown Menu */}
       {menuOpen && (
-        <div className="animate-slide-down" style={{
+        <div style={{
           position: "fixed", top: "64px", left: 0, right: 0,
           background: "var(--ab-navy)", zIndex: 99,
-          padding: "12px 16px 20px",
+          padding: "12px 16px 24px",
           boxShadow: "0 8px 32px rgba(10,31,92,0.4)",
           borderTop: "0.5px solid rgba(255,255,255,0.1)",
+          animation: "slideDown 0.2s ease",
         }}>
+          {/* Connect button inside menu on mobile */}
+          <div style={{ padding: "8px 16px 12px", borderBottom: "0.5px solid rgba(255,255,255,0.1)", marginBottom: "8px" }}>
+            <ConnectKitButton />
+          </div>
+
           <Link href="/" style={mobileLinkStyle("/")} onClick={() => setMenuOpen(false)}>⚽ Matches</Link>
           <Link href="/leaderboard" style={mobileLinkStyle("/leaderboard")} onClick={() => setMenuOpen(false)}>🏆 Leaderboard</Link>
           <Link href="/history" style={mobileLinkStyle("/history")} onClick={() => setMenuOpen(false)}>📋 History</Link>
