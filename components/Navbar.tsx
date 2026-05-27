@@ -77,8 +77,8 @@ export default function Navbar() {
             <Image
               src="/logo.svg"
               alt="Artemis Bet"
-              width={120}
-              height={40}
+              width={200}
+              height={52}
               style={{ objectFit: "contain" }}
               priority
             />

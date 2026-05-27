@@ -1,23 +1,21 @@
-<svg width="100%" viewBox="0 0 680 300" role="img" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <style>
-      .logo-bg { fill: #0A1F5C; }
-      .logo-a-left { fill: #ffffff; }
-      .logo-a-right { fill: #4FA8F5; }
-      .logo-star { fill: #4FA8F5; }
-      .logo-name { font-family: 'Syne', 'Arial Black', sans-serif; font-weight: 800; fill: #ffffff; letter-spacing: 0.08em; }
-      .logo-bet { fill: #4FA8F5; }
-      .logo-tag { font-family: 'DM Sans', Arial, sans-serif; font-weight: 400; fill: rgba(255,255,255,0.5); letter-spacing: 0.25em; }
-    </style>
-  </defs>
-  <rect x="140" y="20" width="400" height="260" rx="20" class="logo-bg"/>
-  <polygon points="260,220 300,100 320,100 295,175" class="logo-a-left"/>
-  <polygon points="380,220 340,100 320,100 345,175" class="logo-a-right"/>
-  <rect x="292" y="170" width="56" height="12" rx="3" class="logo-a-left"/>
-  <g transform="translate(362,108)">
-    <polygon points="0,-14 3,-3 14,0 3,3 0,14 -3,3 -14,0 -3,-3" class="logo-star"/>
-    <circle cx="18" cy="-14" r="3" class="logo-star"/>
+<svg width="200" height="52" viewBox="0 0 200 52" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Artemis Bet</title>
+
+  <!-- A letterform - left stroke -->
+  <polygon points="8,48 24,4 30,4 22,26" fill="#ffffff"/>
+  <!-- A letterform - right stroke -->
+  <polygon points="52,48 36,4 30,4 38,26" fill="#4FA8F5"/>
+  <!-- A crossbar -->
+  <rect x="20" y="28" width="20" height="5" rx="2" fill="#ffffff"/>
+
+  <!-- Star top right of A -->
+  <g transform="translate(56,10)">
+    <polygon points="0,-7 1.5,-1.5 7,0 1.5,1.5 0,7 -1.5,1.5 -7,0 -1.5,-1.5" fill="#4FA8F5"/>
+    <circle cx="9" cy="-7" r="1.8" fill="#4FA8F5"/>
   </g>
-  <text x="340" y="252" text-anchor="middle" class="logo-name" font-size="26">ARTEMIS <tspan class="logo-bet">BET</tspan></text>
-  <text x="340" y="272" text-anchor="middle" class="logo-tag" font-size="10">PREDICT. STAKE. WIN.</text>
+
+  <!-- ARTEMIS text -->
+  <text x="72" y="24" font-family="'Syne', 'Arial Black', sans-serif" font-weight="800" font-size="18" fill="#ffffff" letter-spacing="2">ARTEMIS</text>
+  <!-- BET text -->
+  <text x="72" y="44" font-family="'Syne', 'Arial Black', sans-serif" font-weight="800" font-size="14" fill="#4FA8F5" letter-spacing="4">BET</text>
 </svg>
