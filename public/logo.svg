@@ -1,0 +1,23 @@
+<svg width="100%" viewBox="0 0 680 300" role="img" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .logo-bg { fill: #0A1F5C; }
+      .logo-a-left { fill: #ffffff; }
+      .logo-a-right { fill: #4FA8F5; }
+      .logo-star { fill: #4FA8F5; }
+      .logo-name { font-family: 'Syne', 'Arial Black', sans-serif; font-weight: 800; fill: #ffffff; letter-spacing: 0.08em; }
+      .logo-bet { fill: #4FA8F5; }
+      .logo-tag { font-family: 'DM Sans', Arial, sans-serif; font-weight: 400; fill: rgba(255,255,255,0.5); letter-spacing: 0.25em; }
+    </style>
+  </defs>
+  <rect x="140" y="20" width="400" height="260" rx="20" class="logo-bg"/>
+  <polygon points="260,220 300,100 320,100 295,175" class="logo-a-left"/>
+  <polygon points="380,220 340,100 320,100 345,175" class="logo-a-right"/>
+  <rect x="292" y="170" width="56" height="12" rx="3" class="logo-a-left"/>
+  <g transform="translate(362,108)">
+    <polygon points="0,-14 3,-3 14,0 3,3 0,14 -3,3 -14,0 -3,-3" class="logo-star"/>
+    <circle cx="18" cy="-14" r="3" class="logo-star"/>
+  </g>
+  <text x="340" y="252" text-anchor="middle" class="logo-name" font-size="26">ARTEMIS <tspan class="logo-bet">BET</tspan></text>
+  <text x="340" y="272" text-anchor="middle" class="logo-tag" font-size="10">PREDICT. STAKE. WIN.</text>
+</svg>

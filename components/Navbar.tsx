@@ -5,6 +5,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function Navbar() {
   const { isConnected, address } = useAccount();
@@ -52,14 +53,6 @@ export default function Navbar() {
           .mobile-right { display: flex !important; }
           .navbar-inner { padding: 0 1rem !important; }
         }
-        /* Force ConnectKit button to not overflow */
-        [data-testid="connect-button"], 
-        .ck-button,
-        w3m-button,
-        button[class*="connect"] {
-          max-width: 140px !important;
-          font-size: 13px !important;
-        }
       `}</style>
 
       <nav style={{
@@ -80,14 +73,15 @@ export default function Navbar() {
           overflow: "hidden",
         }}>
           {/* Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-            <span style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 800, fontSize: "18px",
-              color: "#fff", letterSpacing: "0.06em",
-            }}>
-              ARTEMIS <span style={{ color: "var(--ab-sky)" }}>BET</span>
-            </span>
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, display: "flex", alignItems: "center" }}>
+            <Image
+              src="/logo.svg"
+              alt="Artemis Bet"
+              width={120}
+              height={40}
+              style={{ objectFit: "contain" }}
+              priority
+            />
           </Link>
 
           {/* Desktop Links */}
@@ -135,11 +129,9 @@ export default function Navbar() {
           borderTop: "0.5px solid rgba(255,255,255,0.1)",
           animation: "slideDown 0.2s ease",
         }}>
-          {/* Connect button inside menu on mobile */}
           <div style={{ padding: "8px 16px 12px", borderBottom: "0.5px solid rgba(255,255,255,0.1)", marginBottom: "8px" }}>
             <ConnectKitButton />
           </div>
-
           <Link href="/" style={mobileLinkStyle("/")} onClick={() => setMenuOpen(false)}>⚽ Matches</Link>
           <Link href="/leaderboard" style={mobileLinkStyle("/leaderboard")} onClick={() => setMenuOpen(false)}>🏆 Leaderboard</Link>
           <Link href="/history" style={mobileLinkStyle("/history")} onClick={() => setMenuOpen(false)}>📋 History</Link>
