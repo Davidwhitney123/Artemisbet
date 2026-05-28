@@ -87,6 +87,7 @@ export default function Navbar() {
           {/* Desktop Links */}
           <div className="desktop-nav" style={{ alignItems: "center", gap: "1.5rem" }}>
             <Link href="/" style={linkStyle("/")}>⚽ Matches</Link>
+            <Link href="/bridge" style={linkStyle("/bridge")}>🌉 Bridge</Link>
             <Link href="/leaderboard" style={linkStyle("/leaderboard")}>🏆 Leaderboard</Link>
             <Link href="/history" style={linkStyle("/history")}>📋 History</Link>
             {isConnected && (
@@ -133,6 +134,7 @@ export default function Navbar() {
             <ConnectKitButton />
           </div>
           <Link href="/" style={mobileLinkStyle("/")} onClick={() => setMenuOpen(false)}>⚽ Matches</Link>
+          <Link href="/bridge" style={mobileLinkStyle("/bridge")} onClick={() => setMenuOpen(false)}>🌉 Bridge</Link>
           <Link href="/leaderboard" style={mobileLinkStyle("/leaderboard")} onClick={() => setMenuOpen(false)}>🏆 Leaderboard</Link>
           <Link href="/history" style={mobileLinkStyle("/history")} onClick={() => setMenuOpen(false)}>📋 History</Link>
           {isConnected && (
