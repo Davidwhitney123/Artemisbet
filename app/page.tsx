@@ -6,6 +6,7 @@ import MatchCard from "@/components/MatchCard";
 import DepositWithdraw from "@/components/DepositWithdraw";
 import UserBets from "@/components/UserBets";
 import LiveMatches from "@/components/LiveMatches";
+import Footer from "@/components/Footer";
 import { useAccount } from "wagmi";
 
 export default function Home() {
@@ -84,6 +85,8 @@ export default function Home() {
           </p>
         </div>
       )}
+
+      <Footer />
     </main>
   );
 }

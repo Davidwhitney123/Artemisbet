@@ -7,6 +7,15 @@ import { formatUSDC } from "@/lib/utils";
 
 const statusLabels = ["Open", "Closed", "Resolved", "Cancelled"];
 
+const WORLD_CUP_MATCHES = [
+  { id: "wc-001", homeTeam: "Argentina", awayTeam: "Brazil", league: "FIFA World Cup 2026", startTime: "2026-06-15T14:00:00" },
+  { id: "wc-002", homeTeam: "France", awayTeam: "Germany", league: "FIFA World Cup 2026", startTime: "2026-06-16T16:00:00" },
+  { id: "wc-003", homeTeam: "England", awayTeam: "Spain", league: "FIFA World Cup 2026", startTime: "2026-06-17T18:00:00" },
+  { id: "wc-004", homeTeam: "Netherlands", awayTeam: "Italy", league: "FIFA World Cup 2026", startTime: "2026-06-18T14:00:00" },
+  { id: "wc-005", homeTeam: "Belgium", awayTeam: "Portugal", league: "FIFA World Cup 2026", startTime: "2026-06-19T16:00:00" },
+  { id: "wc-006", homeTeam: "Uruguay", awayTeam: "Mexico", league: "FIFA World Cup 2026", startTime: "2026-06-20T18:00:00" },
+];
+
 interface ApiFixture {
   id: string;
   sport: string;
@@ -55,6 +64,10 @@ export default function AdminPage() {
   const [fixturesLoading, setFixturesLoading] = useState(true);
   const [importingId, setImportingId] = useState<string | null>(null);
   const [importedIds, setImportedIds] = useState<Set<string>>(new Set());
+
+  // World Cup fixtures state
+  const [importingWcId, setImportingWcId] = useState<string | null>(null);
+  const [importedWcIds, setImportedWcIds] = useState<Set<string>>(new Set());
 
   const { writeContractAsync: wc } = useWriteContract();
   const writeContractAsync = wc as any;
@@ -112,6 +125,25 @@ export default function AdminPage() {
       alert(err?.message?.slice(0, 120) || "Import failed");
     } finally {
       setImportingId(null);
+    }
+  };
+
+  const handleImportWorldCup = async (match: typeof WORLD_CUP_MATCHES[0]) => {
+    try {
+      setImportingWcId(match.id);
+      const startTimestamp = BigInt(Math.floor(new Date(match.startTime).getTime() / 1000));
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: ARTEMIS_ABI,
+        functionName: "createMatch",
+        args: [0, match.homeTeam, match.awayTeam, match.league, startTimestamp],
+      });
+      setImportedWcIds(prev => new Set([...prev, match.id]));
+      refetch();
+    } catch (err: any) {
+      alert(err?.message?.slice(0, 120) || "Import failed");
+    } finally {
+      setImportingWcId(null);
     }
   };
 
@@ -226,6 +258,64 @@ export default function AdminPage() {
               })}
             </div>
           )}
+        </div>
+
+        {/* World Cup 2026 Matches */}
+        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+            <div>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 2px" }}>
+                🏆 World Cup 2026 Matches
+              </p>
+              <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
+                Curated FIFA World Cup fixtures ready to import
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {WORLD_CUP_MATCHES.map(match => {
+              const isImported = importedWcIds.has(match.id);
+              const isImporting = importingWcId === match.id;
+              const startDate = new Date(match.startTime);
+              return (
+                <div key={match.id} style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "12px 16px", borderRadius: "12px",
+                  background: isImported ? "rgba(0,200,150,0.04)" : "var(--ab-ice)",
+                  border: `0.5px solid ${isImported ? "rgba(0,200,150,0.2)" : "rgba(30,111,217,0.1)"}`,
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
+                      <span style={{ fontSize: "11px", color: "var(--ab-royal)", fontWeight: 500 }}>
+                        ⚽ {match.league}
+                      </span>
+                      <span style={{ fontSize: "11px", color: "#aaa" }}>
+                        {startDate.toLocaleDateString()} {startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-navy)", margin: "0" }}>
+                      {match.homeTeam} vs {match.awayTeam}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleImportWorldCup(match)}
+                    disabled={isImporting || isImported}
+                    style={{
+                      padding: "8px 16px", borderRadius: "8px", border: "none",
+                      background: isImported ? "var(--ab-win)" : isImporting ? "rgba(30,111,217,0.3)" : "var(--ab-electric)",
+                      color: "#fff", fontSize: "13px", fontWeight: 700,
+                      cursor: isImporting || isImported ? "not-allowed" : "pointer",
+                      whiteSpace: "nowrap" as const, marginLeft: "12px",
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    {isImported ? "✓ Imported" : isImporting ? "Importing..." : "🏆 Import"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Manual Create Match */}
