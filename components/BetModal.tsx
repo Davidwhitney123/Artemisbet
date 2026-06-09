@@ -345,7 +345,7 @@ export default function BetModal({ match, onClose, onSuccess }: BetModalProps) {
 
               {error && (
                 <div style={{ background: "rgba(34,197,94,0.08)", border: "0.5px solid rgba(34,197,94,0.2)", borderRadius: "8px", padding: "10px 14px", marginBottom: "1rem" }}>
-                  <p style={{ color: "var(--ab-win)", fontSize: "13px", margin: 0 }}>{txError}</p>
+                  <p style={{ color: "var(--ab-win)", fontSize: "13px", margin: 0 }}>{error}</p>
                 </div>
               )}
 
