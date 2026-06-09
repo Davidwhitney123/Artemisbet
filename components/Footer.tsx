@@ -67,12 +67,12 @@ export default function Footer() {
     cursor: "pointer",
     fontSize: "18px",
     transition: "all 0.3s ease",
-    border: "1px solid rgba(30,111,217,0.2)",
+    border: "1px solid var(--ab-border)",
   };
 
   const containerStyle = {
-    background: "var(--ab-white)",
-    borderTop: "0.5px solid rgba(30,111,217,0.15)",
+    background: "var(--ab-royal)",
+    borderTop: "0.5px solid var(--ab-border)",
     padding: "2rem",
     textAlign: "center" as const,
     marginTop: "3rem",
@@ -91,7 +91,7 @@ export default function Footer() {
           fontFamily: "var(--font-display)",
           fontWeight: 700,
           fontSize: "14px",
-          color: "var(--ab-navy)",
+          color: "var(--ab-text-primary)",
           margin: "0 0 1.5rem",
         }}>
           Support & Community
@@ -118,7 +118,7 @@ export default function Footer() {
             <div
               style={iconStyle as React.CSSProperties}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(30,111,217,0.1)";
+                (e.currentTarget as HTMLElement).style.background = "var(--ab-border)";
                 (e.currentTarget as HTMLElement).style.color = "var(--ab-royal)";
               }}
               onMouseLeave={(e) => {
@@ -141,7 +141,7 @@ export default function Footer() {
             <div
               style={iconStyle as React.CSSProperties}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(30,111,217,0.1)";
+                (e.currentTarget as HTMLElement).style.background = "var(--ab-border)";
                 (e.currentTarget as HTMLElement).style.color = "var(--ab-royal)";
               }}
               onMouseLeave={(e) => {
@@ -164,7 +164,7 @@ export default function Footer() {
             <div
               style={iconStyle as React.CSSProperties}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(30,111,217,0.1)";
+                (e.currentTarget as HTMLElement).style.background = "var(--ab-border)";
                 (e.currentTarget as HTMLElement).style.color = "var(--ab-royal)";
               }}
               onMouseLeave={(e) => {
@@ -179,7 +179,7 @@ export default function Footer() {
 
         <p style={{
           fontSize: "12px",
-          color: "#aaa",
+          color: "var(--ab-text-secondary)",
           margin: 0,
         }}>
           © 2026 Artemis Bet · Sports Prediction on Arc Testnet
@@ -196,10 +196,10 @@ export default function Footer() {
           right: "20px",
           width: "380px",
           maxHeight: "500px",
-          background: "#fff",
+          background: "var(--ab-royal)",
           borderRadius: "16px",
-          border: "1px solid rgba(30,111,217,0.2)",
-          boxShadow: "0 10px 40px rgba(30,111,217,0.15)",
+          border: "1px solid var(--ab-border)",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
           display: "flex",
           flexDirection: "column",
           zIndex: 999,
@@ -219,7 +219,7 @@ export default function Footer() {
         >
           <p
             style={{
-              color: "#fff",
+              color: "var(--ab-text-primary)",
               fontFamily: "var(--font-display)",
               fontWeight: 700,
               margin: 0,
@@ -231,9 +231,9 @@ export default function Footer() {
           <button
             onClick={() => setChatOpen(false)}
             style={{
-              background: "rgba(255,255,255,0.2)",
+              background: "rgba(251,250,252,0.2)",
               border: "none",
-              color: "#fff",
+              color: "var(--ab-text-primary)",
               borderRadius: "6px",
               width: "28px",
               height: "28px",
@@ -271,8 +271,8 @@ export default function Footer() {
                   maxWidth: "75%",
                   padding: "8px 12px",
                   borderRadius: "12px",
-                  background: msg.role === "user" ? "var(--ab-royal)" : "rgba(30,111,217,0.08)",
-                  color: msg.role === "user" ? "#fff" : "var(--ab-navy)",
+                  background: msg.role === "user" ? "var(--ab-sky)" : "rgba(6,182,212,0.12)",
+                  color: msg.role === "user" ? "var(--ab-navy)" : "var(--ab-text-primary)",
                   fontSize: "13px",
                   lineHeight: "1.4",
                   wordWrap: "break-word",
@@ -294,8 +294,8 @@ export default function Footer() {
                 style={{
                   padding: "8px 12px",
                   borderRadius: "12px",
-                  background: "rgba(30,111,217,0.08)",
-                  color: "var(--ab-navy)",
+                  background: "rgba(6,182,212,0.12)",
+                  color: "var(--ab-text-primary)",
                   fontSize: "13px",
                 }}
               >
@@ -308,7 +308,7 @@ export default function Footer() {
         {/* Input */}
         <div
           style={{
-            borderTop: "1px solid rgba(30,111,217,0.1)",
+            borderTop: "1px solid var(--ab-border)",
             padding: "12px",
             display: "flex",
             gap: "8px",
@@ -328,9 +328,10 @@ export default function Footer() {
               flex: 1,
               padding: "8px 12px",
               borderRadius: "8px",
-              border: "1px solid rgba(30,111,217,0.2)",
+              border: "1px solid var(--ab-border)",
               fontSize: "13px",
-              color: "var(--ab-navy)",
+              color: "var(--ab-text-primary)",
+              background: "var(--ab-navy)",
               fontFamily: "inherit",
             }}
           />
@@ -338,10 +339,10 @@ export default function Footer() {
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
             style={{
-              background: "var(--ab-electric)",
+              background: "var(--ab-sky)",
               border: "none",
               borderRadius: "8px",
-              color: "#fff",
+              color: "var(--ab-navy)",
               padding: "8px 16px",
               cursor: inputValue.trim() && !isLoading ? "pointer" : "not-allowed",
               fontSize: "13px",
@@ -358,3 +359,4 @@ export default function Footer() {
   </>
   );
 }
+

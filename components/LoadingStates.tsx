@@ -19,7 +19,7 @@ export function MatchCardSkeleton() {
           <div className="skeleton" style={{ width: "40px", height: "12px" }} />
         </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderTop: "0.5px solid rgba(30,111,217,0.08)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderTop: "0.5px solid var(--ab-border)" }}>
         <div className="skeleton" style={{ width: "70px", height: "14px" }} />
         <div className="skeleton" style={{ width: "90px", height: "14px" }} />
         <div className="skeleton" style={{ width: "60px", height: "14px" }} />
@@ -52,8 +52,8 @@ export function LeaderboardRowSkeleton() {
     <div className="animate-fade-in" style={{
       display: "grid", gridTemplateColumns: "48px 1fr 80px 80px 100px",
       gap: "12px", padding: "14px 16px",
-      background: "#fff", borderRadius: "12px",
-      border: "0.5px solid rgba(30,111,217,0.1)",
+      background: "var(--ab-royal)", borderRadius: "12px",
+      border: "0.5px solid var(--ab-border)",
       alignItems: "center",
     }}>
       <div className="skeleton" style={{ width: "28px", height: "28px", borderRadius: "50%" }} />
@@ -73,7 +73,7 @@ export function PageLoader() {
       alignItems: "center", justifyContent: "center", gap: "16px",
     }}>
       <div className="spinner spinner-dark" style={{ width: "36px", height: "36px", borderWidth: "3px" }} />
-      <p style={{ color: "#888", fontSize: "14px", fontFamily: "var(--font-display)" }}>Loading...</p>
+      <p style={{ color: "var(--ab-text-secondary)", fontSize: "14px", fontFamily: "var(--font-display)" }}>Loading...</p>
     </div>
   );
 }
@@ -81,9 +81,9 @@ export function PageLoader() {
 // Toast notification
 export function Toast({ message, type = "success" }: { message: string; type?: "success" | "error" | "info" }) {
   const colors = {
-    success: { bg: "rgba(0,200,150,0.95)", border: "rgba(0,200,150,0.3)" },
-    error:   { bg: "rgba(255,77,106,0.95)", border: "rgba(255,77,106,0.3)" },
-    info:    { bg: "rgba(30,111,217,0.95)", border: "rgba(30,111,217,0.3)" },
+    success: { bg: "rgba(34,197,94,0.95)", border: "rgba(34,197,94,0.4)" },
+    error:   { bg: "rgba(239,68,68,0.95)", border: "rgba(239,68,68,0.4)" },
+    info:    { bg: "rgba(6,182,212,0.95)", border: "rgba(6,182,212,0.4)" },
   };
   const icons = { success: "✓", error: "✕", info: "ℹ" };
 
@@ -94,7 +94,7 @@ export function Toast({ message, type = "success" }: { message: string; type?: "
       border: `0.5px solid ${colors[type].border}`,
       borderRadius: "12px", padding: "12px 20px",
       display: "flex", alignItems: "center", gap: "10px",
-      color: "#fff", fontSize: "14px", fontWeight: 600,
+      color: "var(--ab-text-primary)", fontSize: "14px", fontWeight: 600,
       boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
       maxWidth: "320px",
     }}>

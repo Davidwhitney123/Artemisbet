@@ -26,14 +26,14 @@ export default function ProfilePage() {
   });
 
   if (!isConnected) return (
-    <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+    <main style={{ minHeight: "100vh", background: "var(--ab-navy)" }}>
       <Navbar />
       <div style={{ maxWidth: "500px", margin: "6rem auto", padding: "2rem", textAlign: "center" }}>
         <p style={{ fontSize: "48px", margin: "0 0 16px" }}>👤</p>
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "22px", color: "var(--ab-navy)", margin: "0 0 8px" }}>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "22px", color: "var(--ab-text-primary)", margin: "0 0 8px" }}>
           Your Profile
         </p>
-        <p style={{ color: "#888", fontSize: "15px", margin: "0 0 24px" }}>
+        <p style={{ color: "var(--ab-text-secondary)", fontSize: "15px", margin: "0 0 24px" }}>
           Connect your wallet to view your profile and betting stats.
         </p>
         <ConnectKitButton />
@@ -46,7 +46,7 @@ export default function ProfilePage() {
   const platformBalance = balance ? formatUSDC(balance as bigint) : "0.00";
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+    <main style={{ minHeight: "100vh", background: "var(--ab-navy)" }}>
       <Navbar />
       <div style={{ maxWidth: "700px", margin: "0 auto", padding: "2rem" }}>
 
@@ -54,12 +54,12 @@ export default function ProfilePage() {
         <div style={{
           background: "linear-gradient(135deg, var(--ab-navy) 0%, var(--ab-royal) 100%)",
           borderRadius: "20px", padding: "2rem",
-          marginBottom: "1.5rem", color: "#fff",
+          marginBottom: "1.5rem", color: "var(--ab-text-primary)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "1.5rem" }}>
             <div style={{
               width: "64px", height: "64px", borderRadius: "50%",
-              background: "rgba(255,255,255,0.15)",
+              background: "rgba(251,250,252,0.15)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "28px",
             }}>
@@ -76,17 +76,17 @@ export default function ProfilePage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-            <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: "12px", padding: "14px", textAlign: "center" }}>
+            <div style={{ background: "rgba(251,250,252,0.1)", borderRadius: "12px", padding: "14px", textAlign: "center" }}>
               <p style={{ fontSize: "11px", opacity: 0.7, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Platform Balance</p>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "20px", margin: 0 }}>${platformBalance}</p>
               <p style={{ fontSize: "10px", opacity: 0.6, margin: "2px 0 0" }}>USDC</p>
             </div>
-            <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: "12px", padding: "14px", textAlign: "center" }}>
+            <div style={{ background: "rgba(251,250,252,0.1)", borderRadius: "12px", padding: "14px", textAlign: "center" }}>
               <p style={{ fontSize: "11px", opacity: 0.7, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Bets</p>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "20px", margin: 0 }}>{totalBets}</p>
               <p style={{ fontSize: "10px", opacity: 0.6, margin: "2px 0 0" }}>placed</p>
             </div>
-            <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: "12px", padding: "14px", textAlign: "center" }}>
+            <div style={{ background: "rgba(251,250,252,0.1)", borderRadius: "12px", padding: "14px", textAlign: "center" }}>
               <p style={{ fontSize: "11px", opacity: 0.7, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Network</p>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "14px", margin: 0 }}>Arc Testnet</p>
               <p style={{ fontSize: "10px", opacity: 0.6, margin: "2px 0 0" }}>Chain #5042002</p>
@@ -95,15 +95,15 @@ export default function ProfilePage() {
         </div>
 
         {/* Bet History */}
-        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1rem" }}>
+        <div style={{ background: "var(--ab-royal)", border: "0.5px solid var(--ab-border)", borderRadius: "16px", padding: "1.5rem" }}>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-text-primary)", margin: "0 0 1rem" }}>
             Betting History
           </p>
 
           {totalBets === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem" }}>
               <p style={{ fontSize: "32px", margin: "0 0 8px" }}>🎯</p>
-              <p style={{ color: "#888", fontSize: "14px", margin: 0 }}>No bets yet. Go place your first bet!</p>
+              <p style={{ color: "var(--ab-text-secondary)", fontSize: "14px", margin: 0 }}>No bets yet. Go place your first bet!</p>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -166,14 +166,14 @@ function ProfileBetRow({ betId }: { betId: bigint }) {
     <div style={{
       display: "flex", justifyContent: "space-between", alignItems: "center",
       padding: "12px 16px", borderRadius: "12px",
-      background: isWinner ? "rgba(0,200,150,0.04)" : "#fafafa",
-      border: `0.5px solid ${isWinner ? "rgba(0,200,150,0.2)" : "rgba(30,111,217,0.1)"}`,
+      background: isWinner ? "rgba(0,200,150,0.04)" : "var(--ab-card)",
+      border: `0.5px solid ${isWinner ? "rgba(34,197,94,0.2)" : "var(--ab-border)"}`,
     }}>
       <div>
         <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "14px", color: "var(--ab-navy)", margin: "0 0 3px" }}>
           {homeTeam} vs {awayTeam}
         </p>
-        <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
+        <p style={{ fontSize: "12px", color: "var(--ab-text-secondary)", margin: 0 }}>
           {outcomeLabels[prediction]} · ${formatUSDC(amountUSDC)} USDC · Bet #{betId.toString()}
         </p>
       </div>

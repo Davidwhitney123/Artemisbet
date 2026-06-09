@@ -23,7 +23,7 @@ export default function Home() {
   const matchIds = Array.from({ length: count }, (_, i) => BigInt(i));
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+    <main style={{ minHeight: "100vh", background: "var(--ab-navy)" }}>
       <Navbar />
 
       {/* Hero */}
@@ -35,11 +35,11 @@ export default function Home() {
         <p style={{
           fontFamily: "var(--font-display)", fontWeight: 800,
           fontSize: "clamp(28px, 5vw, 48px)",
-          color: "#fff", margin: "0 0 8px", letterSpacing: "0.02em",
+          color: "var(--ab-text-primary)", margin: "0 0 8px", letterSpacing: "0.02em",
         }}>
           Predict. Stake. Win.
         </p>
-        <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.7)", margin: 0 }}>
+        <p style={{ fontSize: "16px", color: "var(--ab-text-secondary)", margin: 0 }}>
           Sports prediction on Arc Testnet · Powered by USDC
         </p>
       </div>
@@ -59,7 +59,7 @@ export default function Home() {
 
           <p style={{
             fontFamily: "var(--font-display)", fontWeight: 700,
-            fontSize: "20px", color: "var(--ab-navy)",
+            fontSize: "20px", color: "var(--ab-text-primary)",
             margin: "0 0 1rem",
           }}>
             Active Matches
@@ -80,7 +80,7 @@ export default function Home() {
       {/* Connect prompt if not connected */}
       {!isConnected && (
         <div style={{ textAlign: "center", padding: "1rem 2rem 3rem" }}>
-          <p style={{ fontSize: "14px", color: "#888" }}>
+          <p style={{ fontSize: "14px", color: "var(--ab-text-secondary)" }}>
             Connect your wallet to deposit USDC and start betting
           </p>
         </div>
@@ -95,14 +95,14 @@ function ActiveMatches({ matchIds, onBetPlaced }: { matchIds: bigint[]; onBetPla
   if (matchIds.length === 0) {
     return (
       <div style={{
-        background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)",
+        background: "var(--ab-royal)", border: "0.5px solid var(--ab-border)",
         borderRadius: "16px", padding: "3rem", textAlign: "center",
       }}>
         <p style={{ fontSize: "32px", margin: "0 0 8px" }}>⚽</p>
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", margin: "0 0 4px" }}>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-text-primary)", margin: "0 0 4px" }}>
           No Matches Yet
         </p>
-        <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>
+        <p style={{ fontSize: "14px", color: "var(--ab-text-secondary)", margin: 0 }}>
           The admin will add matches soon. Check back later!
         </p>
       </div>
@@ -133,17 +133,17 @@ function MatchItem({ matchId, onBetPlaced }: { matchId: bigint; onBetPlaced?: ()
 
   if (isLoading) return (
     <div style={{
-      background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)",
+      background: "var(--ab-royal)", border: "0.5px solid var(--ab-border)",
       borderRadius: "16px", padding: "1.25rem", textAlign: "center",
       minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center",
     }}>
-      <p style={{ color: "#888", fontSize: "14px" }}>Loading match...</p>
+      <p style={{ color: "var(--ab-text-secondary)", fontSize: "14px" }}>Loading match...</p>
     </div>
   );
 
   if (isError || !raw) return (
     <div style={{
-      background: "#fff", border: "0.5px solid rgba(255,77,106,0.2)",
+      background: "var(--ab-royal)", border: "0.5px solid rgba(239,68,68,0.3)",
       borderRadius: "16px", padding: "1.25rem", textAlign: "center",
       minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center",
     }}>

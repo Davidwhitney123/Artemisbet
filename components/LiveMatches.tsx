@@ -46,7 +46,7 @@ export default function LiveMatches() {
   const hasUpcoming = data.upcoming.length > 0;
 
   if (loading) return (
-    <div style={{ padding: "1rem", textAlign: "center", color: "#888", fontSize: "14px", marginBottom: "1.5rem" }}>
+    <div style={{ padding: "1rem", textAlign: "center", color: "var(--ab-text-secondary)", fontSize: "14px", marginBottom: "1.5rem" }}>
       Loading scores...
     </div>
   );
@@ -65,11 +65,11 @@ export default function LiveMatches() {
             display: "flex", alignItems: "center", gap: "6px",
             padding: "5px 14px", borderRadius: "20px",
             border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 600,
-            background: tab === "live" ? "rgba(255,80,80,0.12)" : "var(--ab-ice)",
-            color: tab === "live" ? "#ff5050" : "#888",
+            background: tab === "live" ? "rgba(239,68,68,0.15)" : "var(--ab-ice)",
+            color: tab === "live" ? "var(--ab-loss)" : "var(--ab-text-secondary)",
           }}
         >
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ff5050", display: "inline-block", animation: tab === "live" ? "pulse 1.5s infinite" : "none" }} />
+          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--ab-loss)", display: "inline-block", animation: tab === "live" ? "pulse 1.5s infinite" : "none" }} />
           LIVE {hasLive && `(${data.live.length})`}
         </button>
         <button
@@ -78,20 +78,20 @@ export default function LiveMatches() {
             padding: "5px 14px", borderRadius: "20px",
             border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 600,
             background: tab === "upcoming" ? "var(--ab-ice)" : "var(--ab-ice)",
-            color: tab === "upcoming" ? "var(--ab-royal)" : "#888",
-            outline: tab === "upcoming" ? "1.5px solid var(--ab-royal)" : "none",
+            color: tab === "upcoming" ? "var(--ab-text-primary)" : "var(--ab-text-secondary)",
+            outline: tab === "upcoming" ? "1.5px solid var(--ab-sky)" : "none",
           }}
         >
           📅 UPCOMING {hasUpcoming && `(${data.upcoming.length})`}
         </button>
-        <span style={{ marginLeft: "auto", fontSize: "11px", color: "#aaa" }}>
+        <span style={{ marginLeft: "auto", fontSize: "11px", color: "var(--ab-text-secondary)" }}>
           Updates every 60s
         </span>
       </div>
 
       {activeMatches.length === 0 ? (
-        <div style={{ padding: "1.5rem", textAlign: "center", background: "#fff", borderRadius: "12px", border: "0.5px solid rgba(30,111,217,0.1)" }}>
-          <p style={{ color: "#888", fontSize: "13px", margin: 0 }}>
+        <div style={{ padding: "1.5rem", textAlign: "center", background: "var(--ab-royal)", borderRadius: "12px", border: "0.5px solid var(--ab-border)" }}>
+          <p style={{ color: "var(--ab-text-secondary)", fontSize: "13px", margin: 0 }}>
             {tab === "live" ? "No live matches right now" : "No upcoming matches today"}
           </p>
         </div>
@@ -119,21 +119,21 @@ function MatchRow({ match }: { match: Match }) {
 
   return (
     <div style={{
-      background: "#fff",
-      border: `0.5px solid ${isLive ? "rgba(255,80,80,0.2)" : "rgba(30,111,217,0.15)"}`,
+      background: "var(--ab-royal)",
+      border: `0.5px solid ${isLive ? "rgba(239,68,68,0.3)" : "var(--ab-border)"}`,
       borderRadius: "12px",
       padding: "12px 16px",
       transition: "box-shadow 0.2s",
     }}>
       {/* League + Sport */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-        <span style={{ fontSize: "11px", color: "var(--ab-royal)", fontWeight: 500 }}>
+        <span style={{ fontSize: "11px", color: "var(--ab-text-secondary)", fontWeight: 500 }}>
           {sportEmoji} {match.league}
         </span>
         <span style={{
           fontSize: "11px", fontWeight: 600,
-          color: isLive ? "#ff5050" : "var(--ab-royal)",
-          background: isLive ? "rgba(255,80,80,0.08)" : "var(--ab-ice)",
+          color: isLive ? "var(--ab-loss)" : "var(--ab-sky)",
+          background: isLive ? "rgba(239,68,68,0.12)" : "rgba(6,182,212,0.12)",
           borderRadius: "20px", padding: "2px 8px",
         }}>
           {isLive
@@ -145,13 +145,13 @@ function MatchRow({ match }: { match: Match }) {
 
       {/* Score Row */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "center" }}>
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-navy)", flex: 1, textAlign: "right" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-text-primary)", flex: 1, textAlign: "right" }}>
           {match.homeTeam}
         </span>
         <span style={{
           fontFamily: "var(--font-display)", fontWeight: 800,
           fontSize: isLive ? "20px" : "14px",
-          color: isLive ? "var(--ab-electric)" : "#aaa",
+          color: isLive ? "var(--ab-sky)" : "var(--ab-text-secondary)",
           minWidth: "60px", textAlign: "center",
         }}>
           {isLive
@@ -159,7 +159,7 @@ function MatchRow({ match }: { match: Match }) {
             : "vs"
           }
         </span>
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-navy)", flex: 1, textAlign: "left" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-text-primary)", flex: 1, textAlign: "left" }}>
           {match.awayTeam}
         </span>
       </div>
@@ -174,9 +174,9 @@ function MatchRow({ match }: { match: Match }) {
           ].map(o => o.value && (
             <div key={o.label} style={{
               flex: 1, textAlign: "center",
-              background: "var(--ab-ice)", borderRadius: "8px", padding: "6px 4px",
+              background: "var(--ab-navy)", borderRadius: "8px", padding: "6px 4px", border: "0.5px solid var(--ab-border)",
             }}>
-              <p style={{ fontSize: "10px", color: "#888", margin: "0 0 2px", textTransform: "uppercase" }}>{o.label}</p>
+              <p style={{ fontSize: "10px", color: "var(--ab-text-secondary)", margin: "0 0 2px", textTransform: "uppercase" }}>{o.label}</p>
               <p style={{ fontSize: "14px", fontWeight: 700, color: o.color, margin: 0, fontFamily: "var(--font-display)" }}>
                 {o.value}
               </p>
@@ -191,10 +191,10 @@ function MatchRow({ match }: { match: Match }) {
           {["Home", "Draw", "Away"].map(label => (
             <div key={label} style={{
               flex: 1, textAlign: "center",
-              background: "var(--ab-ice)", borderRadius: "8px", padding: "6px 4px",
+              background: "var(--ab-navy)", borderRadius: "8px", padding: "6px 4px", border: "0.5px solid var(--ab-border)",
             }}>
-              <p style={{ fontSize: "10px", color: "#888", margin: "0 0 2px", textTransform: "uppercase" }}>{label}</p>
-              <p style={{ fontSize: "13px", fontWeight: 600, color: "#ccc", margin: 0 }}>—</p>
+              <p style={{ fontSize: "10px", color: "var(--ab-text-secondary)", margin: "0 0 2px", textTransform: "uppercase" }}>{label}</p>
+              <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--ab-text-secondary)", margin: 0 }}>—</p>
             </div>
           ))}
         </div>

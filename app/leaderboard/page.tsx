@@ -27,16 +27,16 @@ export default function LeaderboardPage() {
           <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "28px", color: "var(--ab-navy)", margin: "0 0 4px" }}>
             🏆 Leaderboard
           </p>
-          <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>
+          <p style={{ fontSize: "14px", color: "var(--ab-text-secondary)", margin: 0 }}>
             Top bettors by total bets placed on Artemis Bet
           </p>
         </div>
 
         {count === 0 ? (
-          <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "4rem", textAlign: "center" }}>
+          <div style={{ background: "var(--ab-surface)", border: "0.5px solid var(--ab-border)", borderRadius: "16px", padding: "4rem", textAlign: "center" }}>
             <p style={{ fontSize: "40px", margin: "0 0 12px" }}>🏆</p>
             <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", fontSize: "18px", margin: "0 0 8px" }}>No Bets Yet</p>
-            <p style={{ color: "#888", fontSize: "14px", margin: 0 }}>Be the first to place a bet and top the leaderboard!</p>
+            <p style={{ color: "var(--ab-muted)", fontSize: "14px", margin: 0 }}>Be the first to place a bet and top the leaderboard!</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -45,7 +45,7 @@ export default function LeaderboardPage() {
               display: "grid", gridTemplateColumns: "48px 1fr 80px 80px 100px",
               gap: "12px", padding: "10px 16px",
               background: "var(--ab-ice)", borderRadius: "10px",
-              fontSize: "11px", fontWeight: 600, color: "var(--ab-royal)",
+              fontSize: "11px", fontWeight: 600, color: "var(--ab-text-secondary)",
               textTransform: "uppercase", letterSpacing: "0.05em",
             }}>
               <span>Rank</span>
@@ -88,23 +88,23 @@ function LeaderboardBetRow({ betId, rank }: { betId: bigint; rank: number }) {
     <div style={{
       display: "grid", gridTemplateColumns: "48px 1fr 80px 80px 100px",
       gap: "12px", padding: "14px 16px",
-      background: "#fff", borderRadius: "12px",
-      border: rank <= 3 ? `0.5px solid ${rankColors[rank]}40` : "0.5px solid rgba(30,111,217,0.1)",
+      background: "var(--ab-royal)", borderRadius: "12px",
+      border: rank <= 3 ? `0.5px solid ${rankColors[rank]}40` : "0.5px solid var(--ab-border)",
       alignItems: "center",
     }}>
-      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: rankColors[rank] ?? "var(--ab-navy)" }}>
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: rankColors[rank] ?? "var(--ab-text-primary)" }}>
         {rankEmoji[rank] ?? `#${rank}`}
       </span>
-      <span style={{ fontFamily: "monospace", fontSize: "13px", color: "var(--ab-navy)", fontWeight: 600 }}>
+      <span style={{ fontFamily: "monospace", fontSize: "13px", color: "var(--ab-text-primary)", fontWeight: 600 }}>
         <ShortAddress address={bettor} />
       </span>
-      <span style={{ textAlign: "center", fontSize: "14px", fontWeight: 700, color: "var(--ab-royal)" }}>
+      <span style={{ textAlign: "center", fontSize: "14px", fontWeight: 700, color: "var(--ab-sky)" }}>
         #{betId.toString()}
       </span>
-      <span style={{ textAlign: "center", fontSize: "14px", fontWeight: 700, color: claimed ? "var(--ab-win)" : "#888" }}>
+      <span style={{ textAlign: "center", fontSize: "14px", fontWeight: 700, color: claimed ? "var(--ab-win)" : "var(--ab-text-secondary)" }}>
         {claimed ? "✓" : "—"}
       </span>
-      <span style={{ textAlign: "right", fontSize: "14px", fontWeight: 700, color: "var(--ab-navy)", fontFamily: "var(--font-display)" }}>
+      <span style={{ textAlign: "right", fontSize: "14px", fontWeight: 700, color: "var(--ab-text-primary)", fontFamily: "var(--font-display)" }}>
         ${formatUSDC(amountUSDC)}
       </span>
     </div>

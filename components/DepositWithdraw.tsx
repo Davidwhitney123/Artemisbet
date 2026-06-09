@@ -89,15 +89,15 @@ const writeContractAsync = writeContract as any;
 
   return (
     <div style={{
-      background: "#fff",
-      border: "0.5px solid rgba(30,111,217,0.15)",
+      background: "var(--ab-royal)",
+      border: "0.5px solid var(--ab-border)",
       borderRadius: "16px",
       padding: "1.5rem",
     }}>
       <p style={{
         fontFamily: "var(--font-display)",
         fontWeight: 700, fontSize: "16px",
-        color: "var(--ab-navy)", margin: "0 0 1rem",
+        color: "var(--ab-text-primary)", margin: "0 0 1rem",
       }}>
         My Wallet
       </p>
@@ -105,18 +105,18 @@ const writeContractAsync = writeContract as any;
       {/* Balances */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "1.25rem" }}>
         <div style={{ background: "var(--ab-ice)", borderRadius: "10px", padding: "12px" }}>
-          <p style={{ fontSize: "11px", color: "var(--ab-royal)", margin: "0 0 4px", fontWeight: 500 }}>Platform Balance</p>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: 0 }}>
+          <p style={{ fontSize: "11px", color: "var(--ab-text-secondary)", margin: "0 0 4px", fontWeight: 500 }}>Platform Balance</p>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-text-primary)", margin: 0 }}>
             ${contractBalance ? formatUSDC(contractBalance) : "0.00"}
           </p>
-          <p style={{ fontSize: "10px", color: "#888", margin: "2px 0 0" }}>USDC</p>
+          <p style={{ fontSize: "10px", color: "var(--ab-text-secondary)", margin: "2px 0 0" }}>USDC</p>
         </div>
-        <div style={{ background: "#F5F8FF", borderRadius: "10px", padding: "12px", border: "0.5px solid rgba(30,111,217,0.1)" }}>
-          <p style={{ fontSize: "11px", color: "var(--ab-royal)", margin: "0 0 4px", fontWeight: 500 }}>Wallet Balance</p>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: 0 }}>
+        <div style={{ background: "var(--ab-navy)", borderRadius: "10px", padding: "12px", border: "0.5px solid var(--ab-border)" }}>
+          <p style={{ fontSize: "11px", color: "var(--ab-text-secondary)", margin: "0 0 4px", fontWeight: 500 }}>Wallet Balance</p>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-text-primary)", margin: 0 }}>
             ${walletBalance ? formatUSDC(walletBalance as bigint) : "0.00"}
           </p>
-          <p style={{ fontSize: "10px", color: "#888", margin: "2px 0 0" }}>USDC</p>
+          <p style={{ fontSize: "10px", color: "var(--ab-text-secondary)", margin: "2px 0 0" }}>USDC</p>
         </div>
       </div>
 
@@ -129,8 +129,8 @@ const writeContractAsync = writeContract as any;
             style={{
               flex: 1, padding: "8px", borderRadius: "8px",
               border: "none",
-              background: tab === t ? "var(--ab-royal)" : "transparent",
-              color: tab === t ? "#fff" : "var(--ab-royal)",
+              background: tab === t ? "var(--ab-sky)" : "transparent",
+              color: tab === t ? "var(--ab-navy)" : "var(--ab-text-secondary)",
               fontWeight: 600, fontSize: "13px",
               fontFamily: "var(--font-display)",
               cursor: "pointer",
@@ -154,11 +154,12 @@ const writeContractAsync = writeContract as any;
             width: "100%",
             padding: "12px 60px 12px 16px",
             borderRadius: "10px",
-            border: "1px solid rgba(30,111,217,0.25)",
+            border: "1px solid var(--ab-border)",
             fontSize: "16px",
             fontFamily: "var(--font-display)",
             fontWeight: 600,
-            color: "var(--ab-navy)",
+            color: "var(--ab-text-primary)",
+            background: "var(--ab-navy)",
             outline: "none",
             boxSizing: "border-box",
           }}
@@ -166,7 +167,7 @@ const writeContractAsync = writeContract as any;
         <span style={{
           position: "absolute", right: "14px", top: "50%",
           transform: "translateY(-50%)",
-          fontSize: "12px", fontWeight: 600, color: "var(--ab-royal)",
+          fontSize: "12px", fontWeight: 600, color: "var(--ab-text-secondary)",
         }}>USDC</span>
       </div>
 
@@ -178,9 +179,9 @@ const writeContractAsync = writeContract as any;
             onClick={() => setAmount(v)}
             style={{
               flex: 1, padding: "6px", borderRadius: "8px",
-              border: "0.5px solid rgba(30,111,217,0.2)",
-              background: amount === v ? "var(--ab-ice)" : "#fff",
-              color: "var(--ab-royal)", fontSize: "12px", fontWeight: 500,
+              border: "0.5px solid var(--ab-border)",
+              background: amount === v ? "var(--ab-ice)" : "var(--ab-navy)",
+              color: "var(--ab-text-primary)", fontSize: "12px", fontWeight: 500,
               cursor: "pointer",
             }}
           >
@@ -192,8 +193,8 @@ const writeContractAsync = writeContract as any;
       {/* Error */}
       {error && (
         <div style={{
-          background: "rgba(255,77,106,0.08)",
-          border: "0.5px solid rgba(255,77,106,0.3)",
+          background: "rgba(239,68,68,0.12)",
+          border: "0.5px solid rgba(239,68,68,0.3)",
           borderRadius: "8px", padding: "10px 14px", marginBottom: "10px",
         }}>
           <p style={{ color: "var(--ab-loss)", fontSize: "13px", margin: 0 }}>{error}</p>
@@ -209,7 +210,7 @@ const writeContractAsync = writeContract as any;
           background: status === "done"
             ? "var(--ab-win)"
             : tab === "deposit" ? "var(--ab-electric)" : "var(--ab-navy)",
-          color: "#fff", border: "none",
+          color: "var(--ab-text-primary)", border: "none",
           borderRadius: "10px", padding: "13px",
           fontSize: "14px", fontWeight: 700,
           fontFamily: "var(--font-display)",

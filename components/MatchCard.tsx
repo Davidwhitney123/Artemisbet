@@ -80,7 +80,7 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
   const statusColors: Record<number, string> = {
     0: "rgba(0,200,150,0.1)",
     1: "rgba(255,140,0,0.1)",
-    2: "rgba(30,111,217,0.1)",
+    2: "var(--ab-border)",
     3: "rgba(255,77,106,0.1)",
   };
   const statusTextColors: Record<number, string> = {
@@ -98,8 +98,8 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
 
   return (
     <div style={{
-      background: "#fff",
-      border: "0.5px solid rgba(30,111,217,0.15)",
+      background: "var(--ab-royal)",
+      border: "0.5px solid var(--ab-border)",
       borderRadius: "14px",
       padding: "1.25rem",
     }}>
@@ -115,14 +115,14 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
             fontFamily: "var(--font-display)",
             fontWeight: 700,
             fontSize: "16px",
-            color: "var(--ab-navy)",
+            color: "var(--ab-text-primary)",
             margin: "0 0 4px",
           }}>
             {sportEmojis[match.sport] || "🎯"} {match.homeTeam} vs {match.awayTeam}
           </p>
           <p style={{
             fontSize: "12px",
-            color: "#888",
+            color: "var(--ab-text-secondary)",
             margin: 0,
           }}>
             {match.league} · {startDate.toLocaleDateString()}
@@ -142,14 +142,14 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
 
       {/* Total Staked */}
       <div style={{
-        background: "rgba(30,111,217,0.05)",
+        background: "rgba(6,182,212,0.08)",
         borderRadius: "8px",
         padding: "8px 12px",
         marginBottom: "1rem",
       }}>
         <p style={{
           fontSize: "12px",
-          color: "#888",
+          color: "var(--ab-text-secondary)",
           margin: "0 0 4px",
         }}>
           Total Pool
@@ -158,7 +158,7 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
           fontFamily: "var(--font-display)",
           fontWeight: 700,
           fontSize: "18px",
-          color: "var(--ab-royal)",
+          color: "var(--ab-sky)",
           margin: 0,
         }}>
           ${formatUSDC(match.totalStakedUSDC)}
@@ -168,15 +168,15 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
       {/* Result Display (if resolved) */}
       {isResolved && (
         <div style={{
-          background: "rgba(0,200,150,0.08)",
-          border: "0.5px solid rgba(0,200,150,0.2)",
+          background: "rgba(34,197,94,0.12)",
+          border: "0.5px solid rgba(34,197,94,0.3)",
           borderRadius: "8px",
           padding: "10px 12px",
           marginBottom: "1rem",
         }}>
           <p style={{
             fontSize: "12px",
-            color: "#888",
+            color: "var(--ab-text-secondary)",
             margin: "0 0 4px",
           }}>
             Result
@@ -198,8 +198,8 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
         <div>
           {/* How payouts work info box */}
           <div style={{
-            background: "rgba(30,111,217,0.04)",
-            border: "0.5px solid rgba(30,111,217,0.15)",
+            background: "rgba(6,182,212,0.08)",
+            border: "0.5px solid var(--ab-border)",
             borderRadius: "10px",
             padding: "10px 14px",
             marginBottom: "1rem",
@@ -217,30 +217,30 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
                 padding: 0,
               }}
             >
-              <span style={{ fontSize: "12px", color: "var(--ab-royal)", fontWeight: 600 }}>
+              <span style={{ fontSize: "12px", color: "var(--ab-sky)", fontWeight: 600 }}>
                 💡 How payouts work
               </span>
-              <span style={{ fontSize: "12px", color: "var(--ab-royal)" }}>
+              <span style={{ fontSize: "12px", color: "var(--ab-sky)" }}>
                 {showPayoutInfo ? "▲" : "▼"}
               </span>
             </button>
 
             {showPayoutInfo && (
-              <div style={{ marginTop: "10px", fontSize: "12px", color: "#555", lineHeight: "1.7" }}>
-                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.6)", borderRadius: "6px" }}>
-                  <p style={{ margin: "0 0 4px", fontWeight: 500 }}>
+              <div style={{ marginTop: "10px", fontSize: "12px", color: "var(--ab-text-secondary)", lineHeight: "1.7" }}>
+                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(6,182,212,0.1)", borderRadius: "6px" }}>
+                  <p style={{ margin: "0 0 4px", fontWeight: 500, color: "var(--ab-text-primary)" }}>
                     ✅ <strong>How it works:</strong>
                   </p>
-                  <p style={{ margin: 0 }}>
+                  <p style={{ margin: 0, color: "var(--ab-text-secondary)" }}>
                     If your pick wins, you split the entire betting pool with other winners. The more you bet, the bigger your share.
                   </p>
                 </div>
 
-                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.6)", borderRadius: "6px" }}>
-                  <p style={{ margin: "0 0 4px", fontWeight: 500 }}>
+                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(6,182,212,0.1)", borderRadius: "6px" }}>
+                  <p style={{ margin: "0 0 4px", fontWeight: 500, color: "var(--ab-text-primary)" }}>
                     📊 <strong>Quick example:</strong>
                   </p>
-                  <ul style={{ margin: 0, paddingLeft: "18px" }}>
+                  <ul style={{ margin: 0, paddingLeft: "18px", color: "var(--ab-text-secondary)" }}>
                     <li>Total pool: $100</li>
                     <li>You bet: $20 (on winning side)</li>
                     <li>Others on winning side: $30</li>
@@ -248,8 +248,8 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
                   </ul>
                 </div>
 
-                <div style={{ padding: "8px", background: "rgba(0,200,150,0.08)", borderRadius: "6px", border: "0.5px solid rgba(0,200,150,0.2)" }}>
-                  <p style={{ margin: 0, fontWeight: 500 }}>
+                <div style={{ padding: "8px", background: "rgba(34,197,94,0.08)", borderRadius: "6px", border: "0.5px solid rgba(34,197,94,0.2)" }}>
+                  <p style={{ margin: 0, fontWeight: 500, color: "var(--ab-text-secondary)" }}>
                     🎯 <strong>Pro tip:</strong> Pick an outcome fewer people expect = bigger potential payout!
                   </p>
                 </div>
@@ -261,7 +261,7 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
           <div style={{ marginBottom: "1rem" }}>
             <p style={{
               fontSize: "12px",
-              color: "#888",
+              color: "var(--ab-text-secondary)",
               fontWeight: 500,
               margin: "0 0 8px",
             }}>
@@ -282,9 +282,9 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
                     style={{
                       padding: "10px 12px",
                       borderRadius: "8px",
-                      border: `1px solid ${isSelected ? "var(--ab-electric)" : outcomeBorders[outcome]}`,
-                      background: isSelected ? "rgba(123,181,255,0.1)" : "#fff",
-                      color: isSelected ? "var(--ab-electric)" : "var(--ab-navy)",
+                      border: `1px solid ${isSelected ? "var(--ab-sky)" : "var(--ab-border)"}`,
+                      background: isSelected ? "rgba(6,182,212,0.15)" : "var(--ab-navy)",
+                      color: isSelected ? "var(--ab-sky)" : "var(--ab-text-secondary)",
                       fontSize: "13px",
                       fontWeight: 600,
                       cursor: "pointer",
@@ -302,7 +302,7 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
           <div style={{ marginBottom: "1rem" }}>
             <p style={{
               fontSize: "12px",
-              color: "#888",
+              color: "var(--ab-text-secondary)",
               fontWeight: 500,
               margin: "0 0 8px",
             }}>
@@ -317,9 +317,10 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
                 width: "100%",
                 padding: "10px 12px",
                 borderRadius: "8px",
-                border: "1px solid rgba(30,111,217,0.25)",
+                border: "1px solid var(--ab-border)",
                 fontSize: "14px",
-                color: "var(--ab-navy)",
+                color: "var(--ab-text-primary)",
+                background: "var(--ab-navy)",
                 boxSizing: "border-box",
               }}
             />
@@ -328,8 +329,8 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
           {/* Error */}
           {betError && (
             <div style={{
-              background: "rgba(255,77,106,0.08)",
-              border: "0.5px solid rgba(255,77,106,0.3)",
+              background: "rgba(239,68,68,0.12)",
+              border: "0.5px solid rgba(239,68,68,0.3)",
               borderRadius: "8px",
               padding: "10px 12px",
               marginBottom: "1rem",
@@ -353,8 +354,8 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
               padding: "12px 16px",
               borderRadius: "10px",
               border: "none",
-              background: betStatus === "done" ? "var(--ab-win)" : "var(--ab-electric)",
-              color: "#fff",
+              background: betStatus === "done" ? "var(--ab-win)" : "var(--ab-sky)",
+              color: betStatus === "done" ? "var(--ab-surface)" : "var(--ab-navy)",
               fontSize: "14px",
               fontWeight: 700,
               fontFamily: "var(--font-display)",
@@ -376,12 +377,12 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
         <div style={{
           textAlign: "center",
           padding: "12px",
-          background: "rgba(100,100,100,0.05)",
+          background: "rgba(100,100,100,0.08)",
           borderRadius: "8px",
         }}>
           <p style={{
             fontSize: "13px",
-            color: "#888",
+            color: "var(--ab-text-secondary)",
             margin: 0,
           }}>
             {isStarted ? "⏱️ Betting closed" : "Match cancelled or resolved"}
@@ -391,3 +392,4 @@ export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
     </div>
   );
 }
+

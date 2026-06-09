@@ -149,42 +149,42 @@ export default function AdminPage() {
 
   if (!address)
     return (
-      <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+      <main style={{ minHeight: "100vh", background: "var(--ab-navy)" }}>
         <Navbar />
         <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
-          <p style={{ color: "#888", fontSize: "16px" }}>Connect your wallet to access admin panel.</p>
+          <p style={{ color: "var(--ab-text-secondary)", fontSize: "16px" }}>Connect your wallet to access admin panel.</p>
         </div>
       </main>
     );
 
   if (!isOwner)
     return (
-      <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+      <main style={{ minHeight: "100vh", background: "var(--ab-navy)" }}>
         <Navbar />
         <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", textAlign: "center" }}>
           <p style={{ fontSize: "32px", margin: "0 0 12px" }}>🔒</p>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-navy)", fontSize: "18px" }}>Access Denied</p>
-          <p style={{ color: "#888", fontSize: "14px" }}>Only the contract owner can access this page.</p>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ab-text-primary)", fontSize: "18px" }}>Access Denied</p>
+          <p style={{ color: "var(--ab-text-secondary)", fontSize: "14px" }}>Only the contract owner can access this page.</p>
         </div>
       </main>
     );
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--ab-white)" }}>
+    <main style={{ minHeight: "100vh", background: "var(--ab-navy)" }}>
       <Navbar />
       <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2rem" }}>
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "24px", color: "var(--ab-navy)", margin: "0 0 2rem" }}>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "24px", color: "var(--ab-text-primary)", margin: "0 0 2rem" }}>
           ⚙ Admin Panel
         </p>
 
         {/* Import from Live Fixtures */}
-        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
+        <div style={{ background: "var(--ab-royal)", border: "0.5px solid var(--ab-border)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
             <div>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 2px" }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-text-primary)", margin: "0 0 2px" }}>
                 ⚡ Import from Live Fixtures
               </p>
-              <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
+              <p style={{ fontSize: "12px", color: "var(--ab-text-secondary)", margin: 0 }}>
                 One-click import upcoming matches directly to the contract
               </p>
             </div>
@@ -196,16 +196,16 @@ export default function AdminPage() {
                   .then(data => { setFixtures(data.upcoming ?? []); setFixturesLoading(false); })
                   .catch(() => setFixturesLoading(false));
               }}
-              style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.2)", background: "var(--ab-ice)", color: "var(--ab-royal)", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+              style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid var(--ab-border)", background: "var(--ab-navy)", color: "var(--ab-sky)", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
             >
               🔄 Refresh
             </button>
           </div>
 
           {fixturesLoading ? (
-            <p style={{ color: "#888", fontSize: "14px", textAlign: "center", padding: "1rem" }}>Loading fixtures...</p>
+            <p style={{ color: "var(--ab-text-secondary)", fontSize: "14px", textAlign: "center", padding: "1rem" }}>Loading fixtures...</p>
           ) : fixtures.length === 0 ? (
-            <p style={{ color: "#888", fontSize: "14px", textAlign: "center", padding: "1rem" }}>No upcoming fixtures available right now.</p>
+            <p style={{ color: "var(--ab-text-secondary)", fontSize: "14px", textAlign: "center", padding: "1rem" }}>No upcoming fixtures available right now.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {fixtures.map(fixture => {
@@ -217,14 +217,14 @@ export default function AdminPage() {
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                     padding: "12px 16px", borderRadius: "12px",
                     background: isImported ? "rgba(0,200,150,0.04)" : "var(--ab-ice)",
-                    border: `0.5px solid ${isImported ? "rgba(0,200,150,0.2)" : "rgba(30,111,217,0.1)"}`,
+                    border: `0.5px solid ${isImported ? "rgba(0,200,150,0.2)" : "var(--ab-border)"}`,
                   }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
                         <span style={{ fontSize: "11px", color: "var(--ab-royal)", fontWeight: 500 }}>
                           {fixture.league}
                         </span>
-                        <span style={{ fontSize: "11px", color: "#aaa" }}>
+                        <span style={{ fontSize: "11px", color: "var(--ab-muted)" }}>
                           {startDate.toLocaleDateString()} {startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
@@ -245,7 +245,7 @@ export default function AdminPage() {
                       style={{
                         padding: "8px 16px", borderRadius: "8px", border: "none",
                         background: isImported ? "var(--ab-win)" : isImporting ? "rgba(30,111,217,0.3)" : "var(--ab-electric)",
-                        color: "#fff", fontSize: "13px", fontWeight: 700,
+                        color: "var(--ab-surface)", fontSize: "13px", fontWeight: 700,
                         cursor: isImporting || isImported ? "not-allowed" : "pointer",
                         whiteSpace: "nowrap", marginLeft: "12px",
                         fontFamily: "var(--font-display)",
@@ -261,13 +261,13 @@ export default function AdminPage() {
         </div>
 
         {/* World Cup 2026 Matches */}
-        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
+        <div style={{ background: "var(--ab-royal)", border: "0.5px solid var(--ab-border)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
             <div>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 2px" }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-text-primary)", margin: "0 0 2px" }}>
                 🏆 World Cup 2026 Matches
               </p>
-              <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
+              <p style={{ fontSize: "12px", color: "var(--ab-text-secondary)", margin: 0 }}>
                 Curated FIFA World Cup fixtures ready to import
               </p>
             </div>
@@ -282,19 +282,19 @@ export default function AdminPage() {
                 <div key={match.id} style={{
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                   padding: "12px 16px", borderRadius: "12px",
-                  background: isImported ? "rgba(0,200,150,0.04)" : "var(--ab-ice)",
-                  border: `0.5px solid ${isImported ? "rgba(0,200,150,0.2)" : "rgba(30,111,217,0.1)"}`,
+                  background: isImported ? "rgba(34,197,94,0.04)" : "var(--ab-ice)",
+                  border: `0.5px solid ${isImported ? "rgba(34,197,94,0.2)" : "var(--ab-border)"}`,
                 }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
-                      <span style={{ fontSize: "11px", color: "var(--ab-royal)", fontWeight: 500 }}>
+                      <span style={{ fontSize: "11px", color: "var(--ab-sky)", fontWeight: 500 }}>
                         ⚽ {match.league}
                       </span>
-                      <span style={{ fontSize: "11px", color: "#aaa" }}>
+                      <span style={{ fontSize: "11px", color: "var(--ab-text-secondary)" }}>
                         {startDate.toLocaleDateString()} {startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
-                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-navy)", margin: "0" }}>
+                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--ab-text-primary)", margin: "0" }}>
                       {match.homeTeam} vs {match.awayTeam}
                     </p>
                   </div>
@@ -303,8 +303,8 @@ export default function AdminPage() {
                     disabled={isImporting || isImported}
                     style={{
                       padding: "8px 16px", borderRadius: "8px", border: "none",
-                      background: isImported ? "var(--ab-win)" : isImporting ? "rgba(30,111,217,0.3)" : "var(--ab-electric)",
-                      color: "#fff", fontSize: "13px", fontWeight: 700,
+                      background: isImported ? "var(--ab-win)" : isImporting ? "rgba(6,182,212,0.3)" : "var(--ab-sky)",
+                      color: "var(--ab-navy)", fontSize: "13px", fontWeight: 700,
                       cursor: isImporting || isImported ? "not-allowed" : "pointer",
                       whiteSpace: "nowrap" as const, marginLeft: "12px",
                       fontFamily: "var(--font-display)",
@@ -319,63 +319,63 @@ export default function AdminPage() {
         </div>
 
         {/* Manual Create Match */}
-        <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1.25rem" }}>
+        <div style={{ background: "var(--ab-royal)", border: "0.5px solid var(--ab-border)", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-text-primary)", margin: "0 0 1.25rem" }}>
             + Create Match Manually
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
             <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Sport</label>
+              <label style={{ fontSize: "12px", color: "var(--ab-text-secondary)", fontWeight: 500, display: "block", marginBottom: "4px" }}>Sport</label>
               <select
                 value={form.sport}
                 onChange={(e) => setForm((f) => ({ ...f, sport: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", background: "#fff" }}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--ab-border)", fontSize: "14px", color: "var(--ab-text-primary)", background: "var(--ab-navy)" }}
               >
                 <option value="0">⚽ Football</option>
                 <option value="1">🏀 Basketball</option>
               </select>
             </div>
             <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>League</label>
+              <label style={{ fontSize: "12px", color: "var(--ab-text-secondary)", fontWeight: 500, display: "block", marginBottom: "4px" }}>League</label>
               <input
                 placeholder="e.g. Premier League"
                 value={form.league}
                 onChange={(e) => setForm((f) => ({ ...f, league: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--ab-border)", fontSize: "14px", color: "var(--ab-text-primary)", background: "var(--ab-navy)", boxSizing: "border-box" as const }}
               />
             </div>
             <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Home Team</label>
+              <label style={{ fontSize: "12px", color: "var(--ab-text-secondary)", fontWeight: 500, display: "block", marginBottom: "4px" }}>Home Team</label>
               <input
                 placeholder="e.g. Arsenal"
                 value={form.homeTeam}
                 onChange={(e) => setForm((f) => ({ ...f, homeTeam: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--ab-border)", fontSize: "14px", color: "var(--ab-text-primary)", background: "var(--ab-navy)", boxSizing: "border-box" as const }}
               />
             </div>
             <div>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Away Team</label>
+              <label style={{ fontSize: "12px", color: "var(--ab-text-secondary)", fontWeight: 500, display: "block", marginBottom: "4px" }}>Away Team</label>
               <input
                 placeholder="e.g. Chelsea"
                 value={form.awayTeam}
                 onChange={(e) => setForm((f) => ({ ...f, awayTeam: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--ab-border)", fontSize: "14px", color: "var(--ab-text-primary)", background: "var(--ab-navy)", boxSizing: "border-box" as const }}
               />
             </div>
             <div style={{ gridColumn: "span 2" }}>
-              <label style={{ fontSize: "12px", color: "#888", fontWeight: 500, display: "block", marginBottom: "4px" }}>Start Time</label>
+              <label style={{ fontSize: "12px", color: "var(--ab-text-secondary)", fontWeight: 500, display: "block", marginBottom: "4px" }}>Start Time</label>
               <input
                 type="datetime-local"
                 value={form.startTime}
                 onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "14px", color: "var(--ab-navy)", boxSizing: "border-box" as const }}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--ab-border)", fontSize: "14px", color: "var(--ab-text-primary)", background: "var(--ab-navy)", boxSizing: "border-box" as const }}
               />
             </div>
           </div>
 
           {createError && (
-            <div style={{ background: "rgba(255,77,106,0.08)", border: "0.5px solid rgba(255,77,106,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px" }}>
+            <div style={{ background: "rgba(239,68,68,0.08)", border: "0.5px solid rgba(239,68,68,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px" }}>
               <p style={{ color: "var(--ab-loss)", fontSize: "13px", margin: 0 }}>{createError}</p>
             </div>
           )}
@@ -384,8 +384,8 @@ export default function AdminPage() {
             onClick={handleCreate}
             disabled={createStatus === "loading"}
             style={{
-              background: createStatus === "done" ? "var(--ab-win)" : "var(--ab-electric)",
-              color: "#fff", border: "none", borderRadius: "10px",
+              background: createStatus === "done" ? "var(--ab-win)" : "var(--ab-sky)",
+              color: "var(--ab-navy)", border: "none", borderRadius: "10px",
               padding: "12px 24px", fontSize: "14px", fontWeight: 700,
               fontFamily: "var(--font-display)",
               cursor: createStatus === "loading" ? "not-allowed" : "pointer",
@@ -396,13 +396,13 @@ export default function AdminPage() {
         </div>
 
         {/* Matches List */}
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-navy)", margin: "0 0 1rem" }}>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--ab-text-primary)", margin: "0 0 1rem" }}>
           All Matches ({count})
         </p>
 
         {count === 0 ? (
-          <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "16px", padding: "3rem", textAlign: "center" }}>
-            <p style={{ color: "#888", fontSize: "14px" }}>No matches yet. Import or create one above.</p>
+          <div style={{ background: "var(--ab-royal)", border: "0.5px solid var(--ab-border)", borderRadius: "16px", padding: "3rem", textAlign: "center" }}>
+            <p style={{ color: "var(--ab-text-secondary)", fontSize: "14px" }}>No matches yet. Import or create one above.</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -460,7 +460,7 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
 
   const statusColors: Record<number, string> = {
     0: "rgba(0,200,150,0.1)", 1: "rgba(255,140,0,0.1)",
-    2: "rgba(30,111,217,0.1)", 3: "rgba(255,77,106,0.1)",
+    2: "var(--ab-border)", 3: "rgba(255,77,106,0.1)",
   };
   const statusTextColors: Record<number, string> = {
     0: "var(--ab-win)", 1: "var(--ab-live)",
@@ -468,13 +468,13 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
   };
 
   return (
-    <div style={{ background: "#fff", border: "0.5px solid rgba(30,111,217,0.15)", borderRadius: "14px", padding: "1.25rem" }}>
+    <div style={{ background: "var(--ab-surface)", border: "0.5px solid var(--ab-border)", borderRadius: "14px", padding: "1.25rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
         <div>
           <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--ab-navy)", margin: "0 0 4px" }}>
             {homeTeam} vs {awayTeam}
           </p>
-          <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>
+          <p style={{ fontSize: "12px", color: "var(--ab-muted)", margin: 0 }}>
             {league} · ID #{id.toString()} · Staked: ${formatUSDC(totalStaked)}
           </p>
         </div>
@@ -500,13 +500,13 @@ function AdminMatchRow({ matchId, onAction }: { matchId: bigint; onAction: () =>
         {isClosed && (
           <>
             <select value={resolveOutcome} onChange={(e) => setResolveOutcome(e.target.value)}
-              style={{ padding: "7px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "13px", color: "var(--ab-navy)", background: "#fff" }}>
+              style={{ padding: "7px 12px", borderRadius: "8px", border: "1px solid rgba(30,111,217,0.25)", fontSize: "13px", color: "var(--ab-navy)", background: "var(--ab-surface)" }}>
               <option value="0">Home Win</option>
               <option value="1">Draw</option>
               <option value="2">Away Win</option>
             </select>
             <button onClick={() => doAction("resolveMatch", [id, Number(resolveOutcome)])} disabled={actionStatus === "loading"}
-              style={{ padding: "7px 16px", borderRadius: "8px", border: "none", background: "var(--ab-royal)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+              style={{ padding: "7px 16px", borderRadius: "8px", border: "none", background: "var(--ab-royal)", color: "var(--ab-surface)", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
               {actionStatus === "loading" ? "Resolving..." : "Resolve Match"}
             </button>
           </>

@@ -21,7 +21,7 @@ export default function Navbar() {
   const isOwner = address && owner && address.toLowerCase() === (owner as string).toLowerCase();
 
   const linkStyle = (href: string) => ({
-    color: pathname === href ? "#fff" : "rgba(255,255,255,0.65)",
+    color: pathname === href ? "var(--ab-text-primary)" : "rgba(251,250,252,0.65)",
     textDecoration: "none",
     fontSize: "14px",
     fontWeight: pathname === href ? 700 : 500,
@@ -32,7 +32,7 @@ export default function Navbar() {
   });
 
   const mobileLinkStyle = (href: string) => ({
-    color: pathname === href ? "#fff" : "rgba(255,255,255,0.75)",
+    color: pathname === href ? "var(--ab-surface)" : "rgba(255,255,255,0.75)",
     textDecoration: "none",
     fontSize: "15px",
     fontWeight: pathname === href ? 700 : 500,
@@ -60,7 +60,7 @@ export default function Navbar() {
         position: "sticky",
         top: 0,
         zIndex: 100,
-        boxShadow: "0 2px 20px rgba(10,31,92,0.3)",
+        boxShadow: "0 2px 20px rgba(0,0,0,0.3)",
         width: "100%",
       }}>
         <div className="navbar-inner" style={{
@@ -110,7 +110,7 @@ export default function Navbar() {
               style={{
                 background: "rgba(255,255,255,0.1)", border: "none",
                 borderRadius: "8px", padding: "8px 10px", cursor: "pointer",
-                color: "#fff", fontSize: "20px", lineHeight: 1,
+                color: "var(--ab-surface)", fontSize: "20px", lineHeight: 1,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}
             >
