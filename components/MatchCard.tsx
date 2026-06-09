@@ -1,395 +1,226 @@
 "use client";
 import { useState } from "react";
-import { useWriteContract, useAccount } from "wagmi";
-import { ARTEMIS_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
-import { formatUSDC } from "@/lib/utils";
+import { formatUSDC, getSportLabel, getStatusLabel, formatDate } from "@/lib/utils";
+import BetModal from "./BetModal";
+
+interface Match {
+  id: bigint;
+  sport: number;
+  homeTeam: string;
+  awayTeam: string;
+  league: string;
+  startTime: bigint;
+  status: number;
+  result: number;
+  totalStakedUSDC: bigint;
+}
 
 interface MatchCardProps {
-  match: {
-    id: bigint;
-    sport: number;
-    homeTeam: string;
-    awayTeam: string;
-    league: string;
-    startTime: bigint;
-    status: number;
-    result: number;
-    totalStakedUSDC: bigint;
-  };
+  match: Match;
   onBetPlaced?: () => void;
 }
 
-const statusLabels = ["Open", "Closed", "Resolved", "Cancelled"];
-const sportEmojis: Record<number, string> = {
-  0: "⚽",
-  1: "🏀",
-};
+const outcomeLabels = ["Home Win", "Draw", "Away Win"];
 
-export default function MatchCard({ match, onBetPlaced }: MatchCardProps) {
-  const { address } = useAccount();
-  const [selectedOutcome, setSelectedOutcome] = useState<string>("0");
-  const [betAmount, setBetAmount] = useState<string>("");
-  const [betStatus, setBetStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [betError, setBetError] = useState("");
-  const [showPayoutInfo, setShowPayoutInfo] = useState(false);
+export default function MatchCard({ match: rawMatch, onBetPlaced }: MatchCardProps) {
+  const [showBetModal, setShowBetModal] = useState(false);
 
-  const { writeContractAsync: wc } = useWriteContract();
-  const writeContractAsync = wc as any;
+  const m = rawMatch as any;
+  const match: Match = {
+    id: BigInt(m.id ?? 0),
+    sport: Number(m.sport ?? 0),
+    homeTeam: String(m.homeTeam ?? ""),
+    awayTeam: String(m.awayTeam ?? ""),
+    league: String(m.league ?? ""),
+    startTime: BigInt(m.startTime ?? 0),
+    status: Number(m.status ?? 0),
+    result: Number(m.result ?? 0),
+    totalStakedUSDC: BigInt(m.totalStakedUSDC ?? 0),
+  };
 
   const isOpen = match.status === 0;
   const isResolved = match.status === 2;
+  const isCancelled = match.status === 3;
+  const matchStarted = Number(match.startTime) * 1000 < Date.now();
 
-  const startDate = new Date(Number(match.startTime) * 1000);
-  const isStarted = new Date() > startDate;
-
-  const handleBet = async () => {
-    if (!betAmount || parseFloat(betAmount) <= 0) {
-      setBetError("Enter a valid bet amount");
-      return;
-    }
-
-    if (!address) {
-      setBetError("Connect wallet first");
-      return;
-    }
-
-    try {
-      setBetError("");
-      setBetStatus("loading");
-
-      const amountInUSDC = BigInt(Math.floor(parseFloat(betAmount) * 1e6)); // USDC has 6 decimals
-
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS,
-        abi: ARTEMIS_ABI,
-        functionName: "placeBet",
-        args: [match.id, Number(selectedOutcome), amountInUSDC],
-      });
-
-      setBetStatus("done");
-      setBetAmount("");
-      setSelectedOutcome("0");
-      onBetPlaced?.();
-      setTimeout(() => setBetStatus("idle"), 2000);
-    } catch (err: any) {
-      setBetError(err?.message?.slice(0, 100) || "Bet failed");
-      setBetStatus("error");
-    }
+  const statusBadge = () => {
+    if (isOpen && !matchStarted) return { label: "● Open", bg: "rgba(34,197,94,0.15)", color: "#22C55E", border: "rgba(34,197,94,0.3)" };
+    if (isOpen && matchStarted) return { label: "● Live", bg: "rgba(239,68,68,0.15)", color: "#EF4444", border: "rgba(239,68,68,0.3)" };
+    if (isResolved) return { label: "Resolved", bg: "rgba(59,130,246,0.15)", color: "#60A5FA", border: "rgba(59,130,246,0.3)" };
+    if (isCancelled) return { label: "Cancelled", bg: "rgba(239,68,68,0.15)", color: "#EF4444", border: "rgba(239,68,68,0.3)" };
+    return { label: "Closed", bg: "rgba(245,158,11,0.15)", color: "#F59E0B", border: "rgba(245,158,11,0.3)" };
   };
 
-  const statusColors: Record<number, string> = {
-    0: "rgba(0,200,150,0.1)",
-    1: "rgba(255,140,0,0.1)",
-    2: "var(--ab-border)",
-    3: "rgba(255,77,106,0.1)",
-  };
-  const statusTextColors: Record<number, string> = {
-    0: "var(--ab-win)",
-    1: "var(--ab-live)",
-    2: "var(--ab-royal)",
-    3: "var(--ab-loss)",
-  };
-
-  const outcomeBorders: Record<string, string> = {
-    "0": "rgba(0,200,150,0.3)",
-    "1": "rgba(100,100,100,0.3)",
-    "2": "rgba(255,77,106,0.3)",
-  };
+  const badge = statusBadge();
 
   return (
-    <div style={{
-      background: "var(--ab-royal)",
-      border: "0.5px solid var(--ab-border)",
-      borderRadius: "14px",
-      padding: "1.25rem",
-    }}>
-      {/* Header */}
+    <>
       <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        marginBottom: "1rem",
-      }}>
-        <div>
-          <p style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: "16px",
-            color: "var(--ab-text-primary)",
-            margin: "0 0 4px",
-          }}>
-            {sportEmojis[match.sport] || "🎯"} {match.homeTeam} vs {match.awayTeam}
-          </p>
-          <p style={{
-            fontSize: "12px",
-            color: "var(--ab-text-secondary)",
-            margin: 0,
-          }}>
-            {match.league} · {startDate.toLocaleDateString()}
-          </p>
-        </div>
-        <span style={{
-          background: statusColors[match.status] ?? "var(--ab-ice)",
-          color: statusTextColors[match.status] ?? "var(--ab-royal)",
-          borderRadius: "20px",
-          padding: "3px 12px",
-          fontSize: "11px",
-          fontWeight: 600,
-        }}>
-          {statusLabels[match.status]}
-        </span>
-      </div>
-
-      {/* Total Staked */}
-      <div style={{
-        background: "rgba(6,182,212,0.08)",
-        borderRadius: "8px",
-        padding: "8px 12px",
-        marginBottom: "1rem",
-      }}>
-        <p style={{
-          fontSize: "12px",
-          color: "var(--ab-text-secondary)",
-          margin: "0 0 4px",
-        }}>
-          Total Pool
-        </p>
-        <p style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: "18px",
-          color: "var(--ab-sky)",
-          margin: 0,
-        }}>
-          ${formatUSDC(match.totalStakedUSDC)}
-        </p>
-      </div>
-
-      {/* Result Display (if resolved) */}
-      {isResolved && (
+        background: "linear-gradient(145deg, #1E293B 0%, #162032 100%)",
+        border: "1px solid #334155",
+        borderRadius: "16px",
+        padding: "1.25rem",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+        position: "relative",
+        overflow: "hidden",
+      }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)";
+          (e.currentTarget as HTMLDivElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.5)";
+          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(59,130,246,0.4)";
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
+          (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+          (e.currentTarget as HTMLDivElement).style.borderColor = "#334155";
+        }}
+      >
+        {/* Top accent line */}
         <div style={{
-          background: "rgba(34,197,94,0.12)",
-          border: "0.5px solid rgba(34,197,94,0.3)",
-          borderRadius: "8px",
-          padding: "10px 12px",
-          marginBottom: "1rem",
-        }}>
-          <p style={{
-            fontSize: "12px",
-            color: "var(--ab-text-secondary)",
-            margin: "0 0 4px",
+          position: "absolute", top: 0, left: 0, right: 0, height: "2px",
+          background: isOpen ? "linear-gradient(90deg, #3B82F6, #22C55E)" : "linear-gradient(90deg, #334155, #334155)",
+        }} />
+
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", paddingTop: "4px" }}>
+          <span style={{ fontSize: "12px", color: "#9AA3BB", fontWeight: 500 }}>
+            {getSportLabel(match.sport)} · {match.league}
+          </span>
+          <span style={{
+            background: badge.bg, color: badge.color,
+            border: `0.5px solid ${badge.border}`,
+            borderRadius: "20px", padding: "3px 10px",
+            fontSize: "11px", fontWeight: 600,
           }}>
-            Result
-          </p>
-          <p style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: "14px",
-            color: "var(--ab-win)",
-            margin: 0,
-          }}>
-            {match.result === 0 ? "🏆 Home Win" : match.result === 1 ? "🤝 Draw" : "🏆 Away Win"}
-          </p>
+            {badge.label}
+          </span>
         </div>
-      )}
 
-      {/* Betting Interface */}
-      {isOpen && !isStarted && (
-        <div>
-          {/* How payouts work info box */}
+        {/* Teams */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center", gap: "8px", marginBottom: "16px",
+        }}>
+          <div style={{ textAlign: "center" }}>
+            <p style={{
+              fontFamily: "var(--font-display)", fontWeight: 700,
+              fontSize: "15px", color: "#FBFAFC", margin: 0,
+            }}>
+              {match.homeTeam}
+            </p>
+            <p style={{ fontSize: "11px", color: "#9AA3BB", margin: "3px 0 0" }}>Home</p>
+          </div>
           <div style={{
-            background: "rgba(6,182,212,0.08)",
-            border: "0.5px solid var(--ab-border)",
-            borderRadius: "10px",
-            padding: "10px 14px",
-            marginBottom: "1rem",
+            background: "#111827", border: "1px solid #334155",
+            borderRadius: "10px", padding: "8px 14px", textAlign: "center",
           }}>
-            <button
-              onClick={() => setShowPayoutInfo(!showPayoutInfo)}
-              style={{
-                width: "100%",
-                background: "none",
-                border: "none",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                cursor: "pointer",
-                padding: 0,
-              }}
-            >
-              <span style={{ fontSize: "12px", color: "var(--ab-sky)", fontWeight: 600 }}>
-                💡 How payouts work
-              </span>
-              <span style={{ fontSize: "12px", color: "var(--ab-sky)" }}>
-                {showPayoutInfo ? "▲" : "▼"}
-              </span>
-            </button>
-
-            {showPayoutInfo && (
-              <div style={{ marginTop: "10px", fontSize: "12px", color: "var(--ab-text-secondary)", lineHeight: "1.7" }}>
-                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(6,182,212,0.1)", borderRadius: "6px" }}>
-                  <p style={{ margin: "0 0 4px", fontWeight: 500, color: "var(--ab-text-primary)" }}>
-                    ✅ <strong>How it works:</strong>
-                  </p>
-                  <p style={{ margin: 0, color: "var(--ab-text-secondary)" }}>
-                    If your pick wins, you split the entire betting pool with other winners. The more you bet, the bigger your share.
-                  </p>
-                </div>
-
-                <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(6,182,212,0.1)", borderRadius: "6px" }}>
-                  <p style={{ margin: "0 0 4px", fontWeight: 500, color: "var(--ab-text-primary)" }}>
-                    📊 <strong>Quick example:</strong>
-                  </p>
-                  <ul style={{ margin: 0, paddingLeft: "18px", color: "var(--ab-text-secondary)" }}>
-                    <li>Total pool: $100</li>
-                    <li>You bet: $20 (on winning side)</li>
-                    <li>Others on winning side: $30</li>
-                    <li>Your share: ($20 ÷ $50) × $100 = <strong>$40</strong></li>
-                  </ul>
-                </div>
-
-                <div style={{ padding: "8px", background: "rgba(34,197,94,0.08)", borderRadius: "6px", border: "0.5px solid rgba(34,197,94,0.2)" }}>
-                  <p style={{ margin: 0, fontWeight: 500, color: "var(--ab-text-secondary)" }}>
-                    🎯 <strong>Pro tip:</strong> Pick an outcome fewer people expect = bigger potential payout!
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Outcome Selection */}
-          <div style={{ marginBottom: "1rem" }}>
             <p style={{
-              fontSize: "12px",
-              color: "var(--ab-text-secondary)",
-              fontWeight: 500,
-              margin: "0 0 8px",
-            }}>
-              Predict
-            </p>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "8px",
-            }}>
-              {["0", "1", "2"].map((outcome, idx) => {
-                const labels = ["Home Win", "Draw", "Away Win"];
-                const isSelected = selectedOutcome === outcome;
-                return (
-                  <button
-                    key={outcome}
-                    onClick={() => setSelectedOutcome(outcome)}
-                    style={{
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      border: `1px solid ${isSelected ? "var(--ab-sky)" : "var(--ab-border)"}`,
-                      background: isSelected ? "rgba(6,182,212,0.15)" : "var(--ab-navy)",
-                      color: isSelected ? "var(--ab-sky)" : "var(--ab-text-secondary)",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                    }}
-                  >
-                    {labels[idx]}
-                  </button>
-                );
-              })}
-            </div>
+              fontFamily: "var(--font-display)", fontWeight: 800,
+              fontSize: "13px", color: "#3B82F6", margin: 0, letterSpacing: "0.05em",
+            }}>VS</p>
           </div>
-
-          {/* Amount Input */}
-          <div style={{ marginBottom: "1rem" }}>
+          <div style={{ textAlign: "center" }}>
             <p style={{
-              fontSize: "12px",
-              color: "var(--ab-text-secondary)",
-              fontWeight: 500,
-              margin: "0 0 8px",
+              fontFamily: "var(--font-display)", fontWeight: 700,
+              fontSize: "15px", color: "#FBFAFC", margin: 0,
             }}>
-              Bet Amount (USDC)
+              {match.awayTeam}
             </p>
-            <input
-              type="number"
-              placeholder="0.00"
-              value={betAmount}
-              onChange={(e) => setBetAmount(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--ab-border)",
-                fontSize: "14px",
-                color: "var(--ab-text-primary)",
-                background: "var(--ab-navy)",
-                boxSizing: "border-box",
-              }}
-            />
+            <p style={{ fontSize: "11px", color: "#9AA3BB", margin: "3px 0 0" }}>Away</p>
           </div>
+        </div>
 
-          {/* Error */}
-          {betError && (
-            <div style={{
-              background: "rgba(239,68,68,0.12)",
-              border: "0.5px solid rgba(239,68,68,0.3)",
-              borderRadius: "8px",
-              padding: "10px 12px",
-              marginBottom: "1rem",
-            }}>
-              <p style={{
-                color: "var(--ab-loss)",
-                fontSize: "12px",
-                margin: 0,
-              }}>
-                {betError}
-              </p>
-            </div>
-          )}
+        {/* Resolved Result Banner */}
+        {isResolved && (
+          <div style={{
+            background: "rgba(59,130,246,0.1)", border: "0.5px solid rgba(59,130,246,0.2)",
+            borderRadius: "8px", padding: "8px", textAlign: "center", marginBottom: "12px",
+          }}>
+            <p style={{ fontSize: "12px", color: "#60A5FA", margin: 0, fontWeight: 600 }}>
+              🏆 Result: {outcomeLabels[match.result]}
+            </p>
+          </div>
+        )}
 
-          {/* Bet Button */}
+        {/* Cancelled Banner */}
+        {isCancelled && (
+          <div style={{
+            background: "rgba(239,68,68,0.08)", border: "0.5px solid rgba(239,68,68,0.2)",
+            borderRadius: "8px", padding: "8px", textAlign: "center", marginBottom: "12px",
+          }}>
+            <p style={{ fontSize: "12px", color: "#EF4444", margin: 0, fontWeight: 600 }}>
+              Match Cancelled · Refunds Available
+            </p>
+          </div>
+        )}
+
+        {/* Stats Row */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "10px 0",
+          borderTop: "1px solid #334155",
+          borderBottom: "1px solid #334155",
+          marginBottom: "14px",
+        }}>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: "10px", color: "#9AA3BB", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Pool</p>
+            <p style={{ fontSize: "14px", fontWeight: 700, color: "#22C55E", margin: 0, fontFamily: "var(--font-display)" }}>
+              ${formatUSDC(match.totalStakedUSDC)}
+            </p>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: "10px", color: "#9AA3BB", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Starts</p>
+            <p style={{ fontSize: "12px", fontWeight: 500, color: "#60A5FA", margin: 0 }}>
+              {formatDate(match.startTime)}
+            </p>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: "10px", color: "#9AA3BB", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Match ID</p>
+            <p style={{ fontSize: "14px", fontWeight: 700, color: "#FBFAFC", margin: 0, fontFamily: "var(--font-display)" }}>
+              #{match.id?.toString() ?? "—"}
+            </p>
+          </div>
+        </div>
+
+        {/* Bet Button */}
+        {isOpen ? (
           <button
-            onClick={handleBet}
-            disabled={betStatus === "loading" || !address}
+            onClick={(e) => { e.stopPropagation(); setShowBetModal(true); }}
             style={{
               width: "100%",
-              padding: "12px 16px",
-              borderRadius: "10px",
-              border: "none",
-              background: betStatus === "done" ? "var(--ab-win)" : "var(--ab-sky)",
-              color: betStatus === "done" ? "var(--ab-surface)" : "var(--ab-navy)",
-              fontSize: "14px",
-              fontWeight: 700,
-              fontFamily: "var(--font-display)",
-              cursor: betStatus === "loading" || !address ? "not-allowed" : "pointer",
-              opacity: betStatus === "loading" || !address ? 0.6 : 1,
+              background: "linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%)",
+              color: "#fff", border: "none", borderRadius: "10px",
+              padding: "12px", fontSize: "14px", fontWeight: 700,
+              fontFamily: "var(--font-display)", cursor: "pointer",
+              letterSpacing: "0.03em",
+              transition: "opacity 0.2s, transform 0.15s",
+              boxShadow: "0 4px 16px rgba(59,130,246,0.3)",
             }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.9"; (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"; }}
           >
-            {betStatus === "loading"
-              ? "Placing Bet..."
-              : betStatus === "done"
-              ? "✓ Bet Placed!"
-              : "Place Bet"}
+            Place Bet →
           </button>
-        </div>
-      )}
-
-      {/* Match Not Open */}
-      {!isOpen && (
-        <div style={{
-          textAlign: "center",
-          padding: "12px",
-          background: "rgba(100,100,100,0.08)",
-          borderRadius: "8px",
-        }}>
-          <p style={{
-            fontSize: "13px",
-            color: "var(--ab-text-secondary)",
-            margin: 0,
+        ) : (
+          <div style={{
+            width: "100%", background: "#111827",
+            border: "1px solid #334155",
+            borderRadius: "10px", padding: "12px",
+            textAlign: "center", fontSize: "14px",
+            color: "#9AA3BB", fontWeight: 500,
           }}>
-            {isStarted ? "⏱️ Betting closed" : "Match cancelled or resolved"}
-          </p>
-        </div>
+            {isResolved ? "Match Resolved" : isCancelled ? "Match Cancelled" : "Betting Closed"}
+          </div>
+        )}
+      </div>
+
+      {showBetModal && (
+        <BetModal
+          match={match}
+          onClose={() => setShowBetModal(false)}
+          onSuccess={() => { setShowBetModal(false); onBetPlaced?.(); }}
+        />
       )}
-    </div>
+    </>
   );
 }
-
